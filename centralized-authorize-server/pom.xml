@@ -29,6 +29,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--TODO 待定...-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+        </dependency>
         <!-- security-cas 中央授权认证服务 -->
         <dependency>
             <groupId>org.springframework.security</groupId>
