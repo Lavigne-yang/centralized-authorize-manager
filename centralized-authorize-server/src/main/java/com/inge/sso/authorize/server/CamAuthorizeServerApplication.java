@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 /**
  * @author lavyoung1325
  */
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication
 public class CamAuthorizeServerApplication {
 
     public static void main(String[] args) {

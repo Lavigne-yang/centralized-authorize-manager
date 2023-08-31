@@ -87,6 +87,10 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.inge.sso.authorize</groupId>
+            <artifactId>centralized-authorize-common</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

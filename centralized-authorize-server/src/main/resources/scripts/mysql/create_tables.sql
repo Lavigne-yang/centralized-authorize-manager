@@ -1,53 +1,63 @@
-CREATE TABLE `CAM_AUTHORIZATION_INFO`  (
-  `ID_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `REGISTERED_CLIENT_ID_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `PRINCIPAL_NAME_` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `AUTHORIZATION_GRANT_TYPE_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ATTRIBUTES_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `STATE_` int CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `AUTHORIZATION_CODE_VALUE_` text NULL,
-  `AUTHORIZATION_CODE_ISSUED_AT_` timestamp(0) NULL DEFAULT NULL,
-  `AUTHORIZATION_CODE_EXPIRES_AT_` timestamp(0) NULL DEFAULT NULL,
-  `AUTHORIZATION_CODE_METADATA_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `ACCESS_TOKEN_VALUE_` text NULL,
-  `ACCESS_TOKEN_ISSUED_AT_` timestamp(0) NULL DEFAULT NULL,
-  `ACCESS_TOKEN_EXPIRES_AT_` timestamp(0) NULL DEFAULT NULL,
-  `ACCESS_TOKEN_METADATA_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `ACCESS_TOKEN_TYPE_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `ACCESS_TOKEN_SCOPES_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `OIDC_ID_TOKEN_VALUE_` text NULL,
-  `OIDC_ID_TOKEN_ISSUED_AT_` timestamp(0) NULL DEFAULT NULL,
-  `OIDC_ID_TOKEN_EXPIRES_AT_` timestamp(0) NULL DEFAULT NULL,
-  `OIDC_ID_TOKEN_METADATA_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `REFRESH_TOKEN_VALUE_` text NULL,
-  `REFRESH_TOKEN_ISSUED_AT_` timestamp(0) NULL DEFAULT NULL,
-  `REFRESH_TOKEN_EXPIRES_AT_` timestamp(0) NULL DEFAULT NULL,
-  `REFRESH_TOKEN_METADATA_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`ID_`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+CREATE TABLE oauth2_registered_client
+(
+    id                            varchar(100)                            NOT NULL,
+    client_id                     varchar(100)                            NOT NULL,
+    client_id_issued_at           timestamp     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    client_secret                 varchar(200)  DEFAULT NULL,
+    client_secret_expires_at      timestamp     DEFAULT NULL,
+    client_name                   varchar(200)                            NOT NULL,
+    client_authentication_methods varchar(1000)                           NOT NULL,
+    authorization_grant_types     varchar(1000)                           NOT NULL,
+    redirect_uris                 varchar(1000) DEFAULT NULL,
+    scopes                        varchar(1000)                           NOT NULL,
+    client_settings               varchar(2000)                           NOT NULL,
+    token_settings                varchar(2000)                           NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE oauth2_authorization_consent
+(
+    registered_client_id varchar(100)  NOT NULL,
+    principal_name       varchar(200)  NOT NULL,
+    authorities          varchar(1000) NOT NULL,
+    PRIMARY KEY (registered_client_id, principal_name)
+);
 
 
-CREATE TABLE `CAM_AUTHORIZATION_CONSENT`  (
-  `REGISTERED_CLIENT_ID_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `PRINCIPAL_NAME_` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `AUTHORITIES_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`REGISTERED_CLIENT_ID_`, `PRINCIPAL_NAME_`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+/*
+IMPORTANT:
+    If using PostgreSQL, update ALL columns defined with 'blob' to 'text',
+    as PostgreSQL does not support the 'blob' data type.
+*/
+CREATE TABLE oauth2_authorization
+(
+    id                            varchar(100) NOT NULL,
+    registered_client_id          varchar(100) NOT NULL,
+    principal_name                varchar(200) NOT NULL,
+    authorization_grant_type      varchar(100) NOT NULL,
+    authorized_scopes             varchar(1000) DEFAULT NULL,
+    attributes                    blob          DEFAULT NULL,
+    state                         varchar(500)  DEFAULT NULL,
+    authorization_code_value      blob          DEFAULT NULL,
+    authorization_code_issued_at  timestamp     DEFAULT NULL,
+    authorization_code_expires_at timestamp     DEFAULT NULL,
+    authorization_code_metadata   blob          DEFAULT NULL,
+    access_token_value            blob          DEFAULT NULL,
+    access_token_issued_at        timestamp     DEFAULT NULL,
+    access_token_expires_at       timestamp     DEFAULT NULL,
+    access_token_metadata         blob          DEFAULT NULL,
+    access_token_type             varchar(100)  DEFAULT NULL,
+    access_token_scopes           varchar(1000) DEFAULT NULL,
+    oidc_id_token_value           blob          DEFAULT NULL,
+    oidc_id_token_issued_at       timestamp     DEFAULT NULL,
+    oidc_id_token_expires_at      timestamp     DEFAULT NULL,
+    oidc_id_token_metadata        blob          DEFAULT NULL,
+    refresh_token_value           blob          DEFAULT NULL,
+    refresh_token_issued_at       timestamp     DEFAULT NULL,
+    refresh_token_expires_at      timestamp     DEFAULT NULL,
+    refresh_token_metadata        blob          DEFAULT NULL,
+    PRIMARY KEY (id)
+);
 
 
 
-CREATE TABLE `CAM_REGISTERED_CLIENT`  (
-  `ID_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `CLIENT_ID_` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `CLIENT_ID_ISSUED_AT_` timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-  `CLIENT_SECRET_` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `CLIENT_SECRET_EXPIRES_AT_` timestamp(0) NULL DEFAULT NULL,
-  `CLIENT_NAME_` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `CLIENT_AUTHENTICATION_METHODS_` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `AUTHORIZATION_GRANT_TYPES_` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `REDIRECT_URIS_` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `SCOPES_` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `CLIENT_SETTINGS_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `TOKEN_SETTINGS_` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`ID_`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;

@@ -20,6 +20,7 @@
     <modules>
         <module>centralized-authorize-server</module>
         <module>centralized-authorize-client</module>
+        <module>centralized-authorize-common</module>
     </modules>
 
     <!--属性配置-->
@@ -76,6 +77,16 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-annotation</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.inge.sso.authorize</groupId>
+                <artifactId>centralized-authorize-common</artifactId>
+                <version>${centralized-authorize-manager.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
