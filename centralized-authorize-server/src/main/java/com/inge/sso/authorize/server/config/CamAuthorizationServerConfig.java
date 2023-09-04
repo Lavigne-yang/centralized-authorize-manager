@@ -1,7 +1,5 @@
 package com.inge.sso.authorize.server.config;
 
-import com.inge.sso.authorize.server.authentication.DeviceClientAuthenticationProvider;
-import com.inge.sso.authorize.server.authentication.converter.DeviceClientAuthenticationConverter;
 import com.inge.sso.authorize.server.federation.FederatedIdentityIdTokenCustomizer;
 import com.inge.sso.authorize.server.utils.Jwks;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -14,11 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
@@ -32,7 +30,6 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 /**
  * 授权服务配置
@@ -62,44 +59,54 @@ public class CamAuthorizationServerConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
-        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
-        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
-        // httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).deviceAuthorizationEndpoint(deviceAuthorizationEndpoint -> deviceAuthorizationEndpoint.verificationUri("/")).deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage("/error.html")).clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider)).authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage("/error.html")).oidc(Customizer.withDefaults());
+//        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
+//        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
+//        // httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).deviceAuthorizationEndpoint(deviceAuthorizationEndpoint -> deviceAuthorizationEndpoint.verificationUri("/")).deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage("/error.html")).clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider)).authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage("/error.html")).oidc(Customizer.withDefaults());
+//        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+////                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
+////                        deviceAuthorizationEndpoint.verificationUri("/activate")
+////                )
+////                .deviceVerificationEndpoint(deviceVerificationEndpoint ->
+////                        deviceVerificationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI)
+////                )
+//                .clientAuthentication(clientAuthentication ->
+//                        clientAuthentication
+//                                .authenticationConverter(deviceClientAuthenticationConverter)
+//                                .authenticationProvider(deviceClientAuthenticationProvider)
+//                )
+//                .authorizationEndpoint(authorizationEndpoint ->
+//                        authorizationEndpoint.consentPage("/error.html"))
+//                .oidc(Customizer.withDefaults());
+//        // Enable OpenID Connect 1.0
+//        // @formatter:on
+//
+//        // @formatter:off
+//        httpSecurity
+//                .exceptionHandling((exception) -> exception
+//                        .defaultAuthenticationEntryPointFor(
+//                                new LoginUrlAuthenticationEntryPoint("/login"),
+//                                new MediaTypeRequestMatcher(MediaType.ALL)
+//                        )
+//                )
+//                .oauth2ResourceServer(oauth2ResourceServer ->
+//                    oauth2ResourceServer.jwt(Customizer.withDefaults())
+//                );
+        // enable OpenID Connect 1.0
         httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-//                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
-//                        deviceAuthorizationEndpoint.verificationUri("/activate")
-//                )
-//                .deviceVerificationEndpoint(deviceVerificationEndpoint ->
-//                        deviceVerificationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI)
-//                )
-                .clientAuthentication(clientAuthentication ->
-                        clientAuthentication
-                                .authenticationConverter(deviceClientAuthenticationConverter)
-                                .authenticationProvider(deviceClientAuthenticationProvider)
-                )
-                .authorizationEndpoint(authorizationEndpoint ->
-                        authorizationEndpoint.consentPage("/error.html"))
                 .oidc(Customizer.withDefaults());
-        // Enable OpenID Connect 1.0
-        // @formatter:on
-
-        // @formatter:off
-        httpSecurity
-                .exceptionHandling((exception) -> exception
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new MediaTypeRequestMatcher(MediaType.ALL)
-                        )
+        httpSecurity.exceptionHandling(exceptions ->
+                        // Redirect to the login page when not authenticated from the
+                        // authorization endpoint
+                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
-                .oauth2ResourceServer(oauth2ResourceServer ->
-                    oauth2ResourceServer.jwt(Customizer.withDefaults())
-                );
+                // ccept access tokens for User Info and/or Client Registration
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         return httpSecurity.build();
     }
 
 
     /**
-     * 加载系统注册信息
+     * 加载授权系统注册信息
      * @return
      */
     @Bean
