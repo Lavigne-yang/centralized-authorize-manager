@@ -1,5 +1,7 @@
 package com.inge.sso.authorize.server.config;
 
+import com.inge.sso.authorize.server.authentication.DeviceClientAuthenticationProvider;
+import com.inge.sso.authorize.server.authentication.converter.DeviceClientAuthenticationConverter;
 import com.inge.sso.authorize.server.federation.FederatedIdentityIdTokenCustomizer;
 import com.inge.sso.authorize.server.utils.Jwks;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -12,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +33,7 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 /**
  * 授权服务配置
@@ -40,27 +44,29 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 @Configuration
 public class CamAuthorizationServerConfig {
 
-
     private JdbcTemplate jdbcTemplate;
-
-    private ServerProperties serverProperties;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Autowired
-    public void setServerProperties(ServerProperties serverProperties) {
-        this.serverProperties = serverProperties;
-    }
-
+    /**
+     * Spring security 的过滤器链，默认配置
+     *
+     *
+     * @param httpSecurity
+     * @param registeredClientRepository
+     * @param authorizationServerSettings
+     * @return
+     * @throws Exception
+     */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
-//        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
-//        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
+        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
+        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
 //        // httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).deviceAuthorizationEndpoint(deviceAuthorizationEndpoint -> deviceAuthorizationEndpoint.verificationUri("/")).deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage("/error.html")).clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider)).authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage("/error.html")).oidc(Customizer.withDefaults());
 //        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
 ////                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
@@ -93,20 +99,23 @@ public class CamAuthorizationServerConfig {
 //                );
         // enable OpenID Connect 1.0
         httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .clientAuthentication(clientAuthentication ->
+                        clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter)
+                                .authenticationProvider(deviceClientAuthenticationProvider)
+                        )
                 .oidc(Customizer.withDefaults());
         httpSecurity.exceptionHandling(exceptions ->
                         // Redirect to the login page when not authenticated from the
                         // authorization endpoint
-                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                        exceptions.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.ALL))
                 )
                 // ccept access tokens for User Info and/or Client Registration
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         return httpSecurity.build();
     }
 
-
     /**
-     * 加载授权系统注册信息
+     * 第三方授权客户端注册信息
      * @return
      */
     @Bean
@@ -114,7 +123,6 @@ public class CamAuthorizationServerConfig {
 
         return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
-
 
     @Bean
     public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
@@ -126,6 +134,10 @@ public class CamAuthorizationServerConfig {
         return new FederatedIdentityIdTokenCustomizer();
     }
 
+    /**
+     * 用于给access_token签名使用
+     * @return
+     */
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         RSAKey rsaKey = Jwks.generateRsa();
@@ -138,27 +150,9 @@ public class CamAuthorizationServerConfig {
         return AuthorizationServerSettings.builder().build();
     }
 
-
     @Bean
     public OAuth2AuthorizationConsentService oAuth2AuthorizationService() {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
     }
-
-    /**
-     * 数据库脚本
-     * @return
-     */
-//    @Bean
-//    public EmbeddedDatabase embeddedDatabase() {
-//        return new EmbeddedDatabaseBuilder()
-//                .generateUniqueName(true)
-//                .setType(EmbeddedDatabaseType.H2)
-//                .setScriptEncoding(StandardCharset.UTF_8.name())
-//                // TODO 脚本运行
-//                .addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
-//                .addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
-//                .addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
-//                .build();
-//    }
 
 }

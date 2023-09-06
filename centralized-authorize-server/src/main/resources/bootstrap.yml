@@ -40,7 +40,7 @@ application:
 
 logging:
   level:
-    org.springframework.security: debug
+    org.springframework.security: info
 
 
 # mybatis plus配置
