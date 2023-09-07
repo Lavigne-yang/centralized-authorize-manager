@@ -15,11 +15,10 @@ import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 
 /**
+ * 密钥生成
  * @author lavyoung1325
  */
 final class KeyGeneratorUtils {
-
-    private static final String SECRET_KEY = "cam-authorize-server";
 
     private static final Logger logger = LoggerFactory.getLogger(KeyGeneratorUtils.class);
 
@@ -30,7 +29,7 @@ final class KeyGeneratorUtils {
     static SecretKey generateSecretKey() {
         SecretKey hmacKey;
         try {
-            hmacKey = KeyGenerator.getInstance(SECRET_KEY).generateKey();
+            hmacKey = KeyGenerator.getInstance("HmacSha256").generateKey();
         } catch (NoSuchAlgorithmException e) {
             logger.error("generateSecretKey error: ", e);
             throw new RuntimeException("generateSecretKey error");
@@ -65,7 +64,7 @@ final class KeyGeneratorUtils {
         KeyPair keyPair;
 
         try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(SECRET_KEY);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
             keyPairGenerator.initialize(ecParameterSpec);
             keyPair = keyPairGenerator.generateKeyPair();
         } catch (Exception e) {

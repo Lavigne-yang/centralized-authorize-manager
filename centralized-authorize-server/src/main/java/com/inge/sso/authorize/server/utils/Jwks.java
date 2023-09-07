@@ -19,7 +19,6 @@ import java.util.UUID;
 public final class Jwks {
 
     private Jwks() {
-
     }
 
     public static RSAKey generateRsa() {
