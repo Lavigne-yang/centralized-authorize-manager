@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /cam/oauth
+    context-path: /cam
 spring:
   application:
     name: cam-authorization-server

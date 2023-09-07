@@ -67,36 +67,6 @@ public class CamAuthorizationServerConfig {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
         DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
         DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
-//        // httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).deviceAuthorizationEndpoint(deviceAuthorizationEndpoint -> deviceAuthorizationEndpoint.verificationUri("/")).deviceVerificationEndpoint(deviceVerificationEndpoint -> deviceVerificationEndpoint.consentPage("/error.html")).clientAuthentication(clientAuthentication -> clientAuthentication.authenticationConverter(deviceClientAuthenticationConverter).authenticationProvider(deviceClientAuthenticationProvider)).authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage("/error.html")).oidc(Customizer.withDefaults());
-//        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-////                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint ->
-////                        deviceAuthorizationEndpoint.verificationUri("/activate")
-////                )
-////                .deviceVerificationEndpoint(deviceVerificationEndpoint ->
-////                        deviceVerificationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI)
-////                )
-//                .clientAuthentication(clientAuthentication ->
-//                        clientAuthentication
-//                                .authenticationConverter(deviceClientAuthenticationConverter)
-//                                .authenticationProvider(deviceClientAuthenticationProvider)
-//                )
-//                .authorizationEndpoint(authorizationEndpoint ->
-//                        authorizationEndpoint.consentPage("/error.html"))
-//                .oidc(Customizer.withDefaults());
-//        // Enable OpenID Connect 1.0
-//        // @formatter:on
-//
-//        // @formatter:off
-//        httpSecurity
-//                .exceptionHandling((exception) -> exception
-//                        .defaultAuthenticationEntryPointFor(
-//                                new LoginUrlAuthenticationEntryPoint("/login"),
-//                                new MediaTypeRequestMatcher(MediaType.ALL)
-//                        )
-//                )
-//                .oauth2ResourceServer(oauth2ResourceServer ->
-//                    oauth2ResourceServer.jwt(Customizer.withDefaults())
-//                );
         // enable OpenID Connect 1.0
         httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .clientAuthentication(clientAuthentication ->
@@ -104,10 +74,12 @@ public class CamAuthorizationServerConfig {
                                 .authenticationProvider(deviceClientAuthenticationProvider)
                         )
                 .oidc(Customizer.withDefaults());
+        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults());
         httpSecurity.exceptionHandling(exceptions ->
                         // Redirect to the login page when not authenticated from the
                         // authorization endpoint
-                        exceptions.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/login"), new MediaTypeRequestMatcher(MediaType.ALL))
+                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
                 // ccept access tokens for User Info and/or Client Registration
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
@@ -120,7 +92,6 @@ public class CamAuthorizationServerConfig {
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-
         return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
 

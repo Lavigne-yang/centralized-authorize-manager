@@ -1,5 +1,7 @@
 package com.inge.sso.authorize.server.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,9 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class DefaultErrorController implements ErrorController {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(DefaultErrorController.class);
+
     @RequestMapping("/error")
     public String handleError(Model model, HttpServletRequest request) {
         String errorMessage = getErrorMessage(request);
+        logger.info("authorization error message :{}", errorMessage);
         if (errorMessage.startsWith("[access_denied]")) {
             model.addAttribute("errorTitle", "Access Denied");
             model.addAttribute("errorMessage", "You have denied access.");
