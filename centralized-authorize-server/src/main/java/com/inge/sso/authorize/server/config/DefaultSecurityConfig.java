@@ -61,6 +61,7 @@ public class DefaultSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
                         .addLogoutHandler(((request, response, authentication) -> {
+                            // TODO 注销处理，清理用户或客户端状态
                             logger.info("request method: {}", request.getMethod());
                             logger.info("{} logout success...", authentication.getName());
                         }))

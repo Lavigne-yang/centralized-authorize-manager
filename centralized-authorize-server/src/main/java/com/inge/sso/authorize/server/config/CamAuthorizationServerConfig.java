@@ -74,8 +74,6 @@ public class CamAuthorizationServerConfig {
                                 .authenticationProvider(deviceClientAuthenticationProvider)
                         )
                 .oidc(Customizer.withDefaults());
-//        httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-//                .oidc(Customizer.withDefaults());
         httpSecurity.exceptionHandling(exceptions ->
                         // Redirect to the login page when not authenticated from the
                         // authorization endpoint
@@ -116,6 +114,10 @@ public class CamAuthorizationServerConfig {
         return ((jwkSelector, securityContext) -> jwkSelector.select(jwkSet));
     }
 
+    /**
+     * 配置Authorization Server实例
+     * @return
+     */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
