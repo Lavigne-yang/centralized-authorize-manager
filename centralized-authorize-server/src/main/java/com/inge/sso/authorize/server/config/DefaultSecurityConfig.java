@@ -48,7 +48,7 @@ public class DefaultSecurityConfig {
                         form
                                 .loginProcessingUrl("/login")
                                 .successHandler(authenticationSuccessHandler())
-                                .defaultSuccessUrl("/activated", false)
+                                .defaultSuccessUrl("/activate", false)
                                 .failureForwardUrl("/error")
                                 .failureHandler(authenticationFailureHandler())
                 )

@@ -39,7 +39,7 @@ public class DefaultErrorController implements ErrorController {
 
     private String getErrorMessage(HttpServletRequest request, HttpServletResponse response) {
         List<String> errMessage = new ArrayList<>();
-        errMessage.add(request.getUserPrincipal().getName());
+        //errMessage.add(request.getUserPrincipal().getName());
         errMessage.add(String.valueOf(response.getStatus()));
         errMessage.add((String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE));
         return StringUtils.join(errMessage, " ");
