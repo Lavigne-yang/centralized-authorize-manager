@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author lavyoung1325
  */
 @Controller
-public class DeviceController {
+public class ClientController {
 
     @GetMapping("/activate")
     public String activate(@RequestParam(value = "user_code", required = false) String userCode) {

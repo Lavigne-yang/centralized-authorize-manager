@@ -20,20 +20,20 @@ import org.springframework.util.Assert;
  *
  * @author lavyoung1325
  */
-public class DeviceClientAuthenticationProvider implements AuthenticationProvider {
+public class ClientAuthenticationProvider implements AuthenticationProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(DeviceClientAuthenticationProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(ClientAuthenticationProvider.class);
 
     private final RegisteredClientRepository registeredClientRepository;
 
-    public DeviceClientAuthenticationProvider(RegisteredClientRepository registeredClientRepository) {
+    public ClientAuthenticationProvider(RegisteredClientRepository registeredClientRepository) {
         Assert.notNull(registeredClientRepository, "registeredClientRepository cannot be null");
         this.registeredClientRepository = registeredClientRepository;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        DeviceClientAuthenticationToken deviceClientAuthentication = (DeviceClientAuthenticationToken) authentication;
+        ClientAuthenticationToken deviceClientAuthentication = (ClientAuthenticationToken) authentication;
         if (!ClientAuthenticationMethod.NONE.equals(deviceClientAuthentication.getClientAuthenticationMethod())) {
             // 授权方式
             return null;
@@ -58,12 +58,12 @@ public class DeviceClientAuthenticationProvider implements AuthenticationProvide
             this.logger.info("Authenticated device client: {}", registeredClient.getClientId());
         }
         // 返回token
-        return new DeviceClientAuthenticationToken(registeredClient, deviceClientAuthentication.getClientAuthenticationMethod(), null);
+        return new ClientAuthenticationToken(registeredClient, deviceClientAuthentication.getClientAuthenticationMethod(), null);
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return DeviceClientAuthenticationToken.class.isAssignableFrom(authentication);
+        return ClientAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
     /**

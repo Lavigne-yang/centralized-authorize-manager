@@ -1,6 +1,6 @@
 package com.inge.sso.authorize.server.authentication.converter;
 
-import com.inge.sso.authorize.server.authentication.DeviceClientAuthenticationToken;
+import com.inge.sso.authorize.server.authentication.ClientAuthenticationToken;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author lavyoung1325
  */
-public class DeviceClientAuthenticationConverter implements AuthenticationConverter {
+public class ClientAuthenticationConverter implements AuthenticationConverter {
 
     private final RequestMatcher deviceAuthorizationRequestMatcher;
     private final RequestMatcher deviceAccessTokenRequestMatcher;
 
-    public DeviceClientAuthenticationConverter(String deviceAuthorizationEndpointUri) {
+    public ClientAuthenticationConverter(String deviceAuthorizationEndpointUri) {
         RequestMatcher clientIdParameterMatcher = request -> request.getParameter(OAuth2ParameterNames.CLIENT_ID) != null;
         this.deviceAuthorizationRequestMatcher = new AndRequestMatcher(
                 new AntPathRequestMatcher(
@@ -51,6 +51,6 @@ public class DeviceClientAuthenticationConverter implements AuthenticationConver
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
         }
         // 返回token
-        return new DeviceClientAuthenticationToken(clientId, ClientAuthenticationMethod.NONE, null, null);
+        return new ClientAuthenticationToken(clientId, ClientAuthenticationMethod.NONE, null, null);
     }
 }

@@ -1,7 +1,7 @@
 package com.inge.sso.authorize.server.config;
 
-import com.inge.sso.authorize.server.authentication.DeviceClientAuthenticationProvider;
-import com.inge.sso.authorize.server.authentication.converter.DeviceClientAuthenticationConverter;
+import com.inge.sso.authorize.server.authentication.ClientAuthenticationProvider;
+import com.inge.sso.authorize.server.authentication.converter.ClientAuthenticationConverter;
 import com.inge.sso.authorize.server.federation.FederatedIdentityIdTokenCustomizer;
 import com.inge.sso.authorize.server.utils.Jwks;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -9,12 +9,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,7 +31,6 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 /**
  * 授权服务配置
@@ -65,8 +62,8 @@ public class CamAuthorizationServerConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity, RegisteredClientRepository registeredClientRepository, AuthorizationServerSettings authorizationServerSettings) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
-        DeviceClientAuthenticationConverter deviceClientAuthenticationConverter = new DeviceClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
-        DeviceClientAuthenticationProvider deviceClientAuthenticationProvider = new DeviceClientAuthenticationProvider(registeredClientRepository);
+        ClientAuthenticationConverter deviceClientAuthenticationConverter = new ClientAuthenticationConverter(authorizationServerSettings.getAuthorizationEndpoint());
+        ClientAuthenticationProvider deviceClientAuthenticationProvider = new ClientAuthenticationProvider(registeredClientRepository);
         // enable OpenID Connect 1.0
         httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .clientAuthentication(clientAuthentication ->

@@ -12,14 +12,14 @@ import java.util.Map;
  * @author lavyoung1325
  */
 @Transient
-public class DeviceClientAuthenticationToken extends OAuth2ClientAuthenticationToken {
+public class ClientAuthenticationToken extends OAuth2ClientAuthenticationToken {
 
 
-    public DeviceClientAuthenticationToken(String clientId, ClientAuthenticationMethod clientAuthenticationMethod, @Nullable Object credentials, @org.springframework.lang.Nullable Map<String, Object> additionalParameters) {
+    public ClientAuthenticationToken(String clientId, ClientAuthenticationMethod clientAuthenticationMethod, @Nullable Object credentials, @org.springframework.lang.Nullable Map<String, Object> additionalParameters) {
         super(clientId, clientAuthenticationMethod, credentials, additionalParameters);
     }
 
-    public DeviceClientAuthenticationToken(RegisteredClient registeredClient, ClientAuthenticationMethod clientAuthenticationMethod, @Nullable Object credentials) {
+    public ClientAuthenticationToken(RegisteredClient registeredClient, ClientAuthenticationMethod clientAuthenticationMethod, @Nullable Object credentials) {
         super(registeredClient, clientAuthenticationMethod, credentials);
     }
 }
