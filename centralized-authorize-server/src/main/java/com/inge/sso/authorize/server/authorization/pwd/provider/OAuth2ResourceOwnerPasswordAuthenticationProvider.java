@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2ResourceOwnerPasswordAuthenticationProvider.class);
-
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE = new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
     private final AuthenticationManager authenticationManager;
@@ -65,18 +64,19 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OAuth2ResourceOwnerPasswordAuthenticationToken resouceOwnerPasswordAuthentication = (OAuth2ResourceOwnerPasswordAuthenticationToken) authentication;
-        OAuth2ClientAuthenticationToken clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(resouceOwnerPasswordAuthentication);
+        OAuth2ResourceOwnerPasswordAuthenticationToken resourceOwnerPasswordAuthentication = (OAuth2ResourceOwnerPasswordAuthenticationToken) authentication;
+        OAuth2ClientAuthenticationToken clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(resourceOwnerPasswordAuthentication);
         RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
         if (logger.isTraceEnabled()) {
             logger.trace("Retrieved registered client");
         }
+        assert registeredClient != null;
         if (!registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.PASSWORD)) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
         }
-        Authentication passwordAuthentication = getUsernamePasswordAuthentication(resouceOwnerPasswordAuthentication);
+        Authentication passwordAuthentication = getUsernamePasswordAuthentication(resourceOwnerPasswordAuthentication);
         Set<String> registeredClientScopes = registeredClient.getScopes();
-        Set<String> requestedScopes = resouceOwnerPasswordAuthentication.getScopes();
+        Set<String> requestedScopes = resourceOwnerPasswordAuthentication.getScopes();
         if (!CollectionUtils.isEmpty(requestedScopes)) {
             Set<String> collected = requestedScopes.stream().filter(s -> !registeredClient.getScopes().contains(s)).collect(Collectors.toSet());
             if (!CollectionUtils.isEmpty(collected)) {
@@ -92,7 +92,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
                 .authorizedScopes(registeredClientScopes)
                 .authorizationGrantType(AuthorizationGrantType.PASSWORD)
-                .authorizationGrant(resouceOwnerPasswordAuthentication);
+                .authorizationGrant(resourceOwnerPasswordAuthentication);
 
         DefaultOAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
         OAuth2Token generated = this.tokenGenerator.generate(tokenContext);
@@ -150,9 +150,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
                 logger.trace("Generated id token");
             }
             idToken = new OidcIdToken(generateToken.getTokenValue(), generated.getIssuedAt(), generateToken.getExpiresAt(), ((Jwt) generateToken).getClaims());
-            authorizationBuilder.token(idToken, metadata -> {
-                metadata.put(OAuth2Authorization.Token.CLAIMS_METADATA_NAME, idToken.getClaims());
-            });
+            authorizationBuilder.token(idToken, metadata -> metadata.put(OAuth2Authorization.Token.CLAIMS_METADATA_NAME, idToken.getClaims()));
         } else {
             idToken = null;
         }
@@ -175,7 +173,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
     @Override
     public boolean supports(Class<?> authentication) {
         boolean supports = OAuth2ResourceOwnerPasswordAuthenticationToken.class.isAssignableFrom(authentication);
-        logger.debug("supports authentication=" + authentication + " returning " + supports);
+        logger.info("supports authentication={}, return:{}", authentication, supports);
         return supports;
     }
 
@@ -184,9 +182,8 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
         String username = (String) additionalParameters.get(OAuth2ParameterNames.USERNAME);
         String password = (String) additionalParameters.get(OAuth2ParameterNames.PASSWORD);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        logger.debug("got usernamePasswordAuthenticationToken=" + usernamePasswordAuthenticationToken);
-        Authentication usernamePasswordAuthentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        return usernamePasswordAuthentication;
+        logger.debug("get usernamePasswordAuthenticationToken={}" , usernamePasswordAuthenticationToken);
+        return authenticationManager.authenticate(usernamePasswordAuthenticationToken);
     }
 
 

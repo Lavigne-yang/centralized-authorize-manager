@@ -258,12 +258,16 @@ public class CamAuthorizationServerConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.withDefaultPasswordEncoder()
+        UserDetails user = User.builder()
                 .username("user1")
-                .password("password")
+                .password("$2a$10$.qdnTAO5.Oi4BTvTkc5j/e00M/yxBv63iXNXxtGSaFb8xi/vyOiYW")
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new BCryptPasswordEncoder().encode("111111"));
     }
 
     @Bean

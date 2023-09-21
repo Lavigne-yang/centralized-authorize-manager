@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author lavyoung1325
+ */
 public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements AuthenticationConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2ResourceOwnerPasswordAuthenticationConverter.class);
@@ -35,6 +38,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
         MultiValueMap<String, String> parameters = OAuth2EndpointUtils.getParameters(request);
         String scope = parameters.getFirst(OAuth2ParameterNames.SCOPE);
         if (StringUtils.hasText(scope) && parameters.get(OAuth2ParameterNames.SCOPE).size() != 1) {
+            logger.error("scopes error: {}", scope);
             OAuth2EndpointUtils.throwError(OAuth2ErrorCodes.INVALID_REQUEST,
                     OAuth2ParameterNames.SCOPE,
                     OAuth2EndpointUtils.ACCESS_TOKEN_REQUEST_ERROR_URI);
@@ -46,6 +50,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
         // username
         String userName = parameters.getFirst(OAuth2ParameterNames.USERNAME);
         if (!StringUtils.hasText(userName) || parameters.get(OAuth2ParameterNames.USERNAME).size() != 1) {
+            logger.error("userName is empty, or userName found more than 2");
             OAuth2EndpointUtils.throwError(OAuth2ErrorCodes.INVALID_REQUEST,
                     OAuth2ParameterNames.USERNAME,
                     OAuth2EndpointUtils.ACCESS_TOKEN_REQUEST_ERROR_URI);
@@ -53,12 +58,14 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
         // password
         String password = parameters.getFirst(OAuth2ParameterNames.PASSWORD);
         if (!StringUtils.hasText(password) || parameters.get(OAuth2ParameterNames.PASSWORD).size() != 1) {
+            logger.error("password is empty, or password found more than 2");
             OAuth2EndpointUtils.throwError(OAuth2ErrorCodes.INVALID_REQUEST,
                     OAuth2ParameterNames.PASSWORD,
                     OAuth2EndpointUtils.ACCESS_TOKEN_REQUEST_ERROR_URI);
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
+        if (authentication == null) {
+            logger.error("invalid client.... authentication is null");
             OAuth2EndpointUtils.throwError(
                     OAuth2ErrorCodes.INVALID_REQUEST,
                     OAuth2ErrorCodes.INVALID_CLIENT,
