@@ -1,5 +1,8 @@
 package com.inge.sso.authorize.server.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +24,7 @@ public class UserEntity implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 1L;
 
+    @TableId("userId")
     private String userId;
     private String account;
     private String username;
@@ -30,12 +34,15 @@ public class UserEntity implements Serializable, UserDetails {
     private String avatarUrl;
     private String sourceFrom;
     private Boolean enable;
+    @TableField(fill = FieldFill.INSERT)
     private Long createTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateTime;
 
     /**
      * 权限
      */
+    @TableField(exist = false)
     private List<GrantedAuthority> authorities;
 
     /**

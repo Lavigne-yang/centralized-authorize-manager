@@ -166,7 +166,8 @@ public class CamAuthorizationServerConfig {
     }
 
     /**
-     * 授权客户端注册信息
+     * 客户端Repository
+     *
      * @return
      */
     @Bean
@@ -197,6 +198,12 @@ public class CamAuthorizationServerConfig {
         return repository;
     }
 
+    /**
+     * 基于db的oauth2的授权管理服务
+     * @param jdbcTemplate db数据源
+     * @param registeredClientRepository 客户端管理
+     * @return
+     */
     @Bean
     public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
         return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
@@ -208,7 +215,7 @@ public class CamAuthorizationServerConfig {
     }
 
     /**
-     * 用于给access_token签名使用
+     * jwk源，使用非对称加密，公开用于检索匹配指定选择器的JWK的方法
      * @return
      */
     @Bean
@@ -219,14 +226,25 @@ public class CamAuthorizationServerConfig {
     }
 
     /**
-     * 配置Authorization Server实例
+     * 添加认证服务器配置，设置jwt签发者、默认端点请求地址等
+     *
      * @return
      */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+        return AuthorizationServerSettings.builder()
+                /**
+                 * 设置token签发地址（http(s)://{ip},{domain}:{port}/context-path）
+                 */
+                .issuer("http://localhost:12000")
+                .build();
     }
 
+    /**
+     * 基于db的授权确认管理服务
+     *
+     * @return
+     */
     @Bean
     public OAuth2AuthorizationConsentService oAuth2AuthorizationService() {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
@@ -247,7 +265,7 @@ public class CamAuthorizationServerConfig {
     }
 
     /**
-     * 盐值加密
+     * 密码解析器，使用BCrypt的方式对密码进行加密和验证
      *
      * @return
      */
@@ -280,6 +298,11 @@ public class CamAuthorizationServerConfig {
         return new HttpSessionEventPublisher();
     }
 
+    /**
+     * 配置jwt解析器
+     * @param jwkSource
+     * @return
+     */
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
