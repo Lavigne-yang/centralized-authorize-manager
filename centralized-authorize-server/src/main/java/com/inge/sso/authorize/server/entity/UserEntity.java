@@ -1,4 +1,4 @@
-package com.inge.sso.authorize.common.entity;
+package com.inge.sso.authorize.server.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -19,14 +19,17 @@ import java.util.Objects;
 @TableName("cam_user")
 public class UserEntity implements Serializable, UserDetails {
 
+    private static final long serialVersionUID = 1L;
+
     private String userId;
+    private String account;
     private String username;
-    private String nickName;
     private String password;
-    private String phoneNumber;
+    private String mobile;
     private String email;
-    private String img;
-    private boolean isEnable;
+    private String avatarUrl;
+    private String sourceFrom;
+    private Boolean enable;
     private Long createTime;
     private Long updateTime;
 
@@ -57,12 +60,12 @@ public class UserEntity implements Serializable, UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.isEnable;
+        return this.enable;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.isEnable();
+        return this.enable;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class UserEntity implements Serializable, UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.isEnable;
+        return this.enable;
     }
 
     @Override
