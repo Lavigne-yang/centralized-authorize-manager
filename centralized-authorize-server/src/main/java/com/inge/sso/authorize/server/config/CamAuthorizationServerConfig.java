@@ -30,7 +30,9 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
@@ -105,6 +107,18 @@ public class CamAuthorizationServerConfig {
                 .apply(authorizationServerConfigurer);
         // 处理使用access token访问用户信息端点和客户端注册端点
         httpSecurity.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
+        authorizationServerConfigurer.oidc(oidc -> {
+            oidc.userInfoEndpoint(userInfo -> userInfo.userInfoMapper(userInfoMapper -> {
+                OAuth2AccessToken accessToken = userInfoMapper.getAccessToken();
+                Map<String, Object> claims = new HashMap<>();
+                claims.put("url", "https://localhost/ITLab1024");
+                claims.put("accessToken", accessToken);
+                claims.put("sub", userInfoMapper.getAuthorization().getPrincipalName());
+                return new OidcUserInfo(claims);
+            }));
+            // 客户端注册
+            oidc.clientRegistrationEndpoint(Customizer.withDefaults());
+        });
         DefaultSecurityFilterChain securityFilterChain = httpSecurity.formLogin(Customizer.withDefaults()).build();
         /*
              Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner
@@ -164,11 +178,8 @@ public class CamAuthorizationServerConfig {
 
     @SuppressWarnings("unchecked")
     private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) {
-
-//        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
         OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
-
         OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
                 new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager(authenticationConfiguration), authorizationService, tokenGenerator);
         // This will add new authentication provider in the list of existing authentication providers.
@@ -182,7 +193,7 @@ public class CamAuthorizationServerConfig {
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        JdbcRegisteredClientRepository repository = new JdbcRegisteredClientRepository(jdbcTemplate);
+        return new JdbcRegisteredClientRepository(jdbcTemplate);
 //        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
 //                .clientId("login-client")
 //                .clientSecret("{noop}openid-connect")
@@ -205,7 +216,6 @@ public class CamAuthorizationServerConfig {
 //                .build();
 //        repository.save(loginClient);
 //        repository.save(registeredClient);
-        return repository;
     }
 
     /**
