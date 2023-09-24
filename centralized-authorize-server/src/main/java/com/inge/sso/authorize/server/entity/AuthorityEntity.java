@@ -1,5 +1,7 @@
 package com.inge.sso.authorize.server.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,13 +22,15 @@ public class AuthorityEntity implements Serializable, GrantedAuthority {
 
     private String id;
     private String menuName;
-    private String menuPid;
+    private String menuParentId;
     private String path;
     private String authority;
     private Integer sort;
     private Integer type;
     private Integer deleted;
+    @TableField(fill = FieldFill.INSERT)
     private Long createTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateTime;
 
     @Override
@@ -38,11 +42,11 @@ public class AuthorityEntity implements Serializable, GrantedAuthority {
             return false;
         }
         AuthorityEntity that = (AuthorityEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(menuName, that.menuName) && Objects.equals(menuPid, that.menuPid) && Objects.equals(path, that.path) && Objects.equals(authority, that.authority) && Objects.equals(sort, that.sort) && Objects.equals(type, that.type) && Objects.equals(deleted, that.deleted) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime);
+        return Objects.equals(id, that.id) && Objects.equals(menuName, that.menuName) && Objects.equals(menuParentId, that.menuParentId) && Objects.equals(path, that.path) && Objects.equals(authority, that.authority) && Objects.equals(sort, that.sort) && Objects.equals(type, that.type) && Objects.equals(deleted, that.deleted) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, menuName, menuPid, path, authority, sort, type, deleted, createTime, updateTime);
+        return Objects.hash(id, menuName, menuParentId, path, authority, sort, type, deleted, createTime, updateTime);
     }
 }

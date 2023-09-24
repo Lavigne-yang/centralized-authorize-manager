@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,7 +26,10 @@ public class UserEntity implements Serializable, UserDetails {
     @TableId("userId")
     private String userId;
     private String account;
-    private String username;
+    /**
+     * 此为用户自定义、用户名可重复，不能用于登陆
+     */
+    private String nickName;
     private String password;
     private String mobile;
     private String email;
@@ -43,7 +45,7 @@ public class UserEntity implements Serializable, UserDetails {
      * 权限
      */
     @TableField(exist = false)
-    private List<GrantedAuthority> authorities;
+    private Collection<? extends GrantedAuthority> authorities;
 
     /**
      * 用户权限
@@ -62,7 +64,7 @@ public class UserEntity implements Serializable, UserDetails {
 
     @Override
     public String getUsername() {
-        return this.username;
+        return this.account;
     }
 
     @Override
@@ -87,18 +89,14 @@ public class UserEntity implements Serializable, UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(password, that.password);
+        return Objects.equals(userId, that.userId) && Objects.equals(account, that.account) && Objects.equals(nickName, that.nickName) && Objects.equals(password, that.password) && Objects.equals(mobile, that.mobile) && Objects.equals(email, that.email) && Objects.equals(avatarUrl, that.avatarUrl) && Objects.equals(sourceFrom, that.sourceFrom) && Objects.equals(enable, that.enable) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(authorities, that.authorities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, username, password);
+        return Objects.hash(userId, account, nickName, password, mobile, email, avatarUrl, sourceFrom, enable, createTime, updateTime, authorities);
     }
 }

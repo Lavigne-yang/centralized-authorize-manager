@@ -1,26 +1,29 @@
 package com.inge.sso.authorize.server.config;
 
+import com.inge.sso.authorize.common.constants.SecurityConstants;
 import com.inge.sso.authorize.server.authorization.pwd.converter.OAuth2ResourceOwnerPasswordAuthenticationConverter;
 import com.inge.sso.authorize.server.authorization.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationFailureHandler;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationSuccessHandler;
-import com.inge.sso.authorize.server.federation.FederatedIdentityIdTokenCustomizer;
 import com.inge.sso.authorize.server.utils.Jwks;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.User;
@@ -29,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
@@ -46,6 +50,8 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
@@ -54,7 +60,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 授权服务配置
@@ -63,17 +70,15 @@ import java.util.Arrays;
  */
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 public class CamAuthorizationServerConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(CamAuthorizationServerConfig.class);
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     /**
      * Spring security 的过滤器链，默认配置
@@ -108,18 +113,6 @@ public class CamAuthorizationServerConfig {
         return securityFilterChain;
     }
 
-    @SuppressWarnings("unchecked")
-    private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) {
-
-        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
-        OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
-
-        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
-                new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager, authorizationService, tokenGenerator);
-        // This will add new authentication provider in the list of existing authentication providers.
-        http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
-    }
 
     /**
      * Spring Security的过滤器链，用于Spring Security的身份认证。
@@ -163,6 +156,19 @@ public class CamAuthorizationServerConfig {
                 );
 
         return http.build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) {
+
+//        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+        OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
+        OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
+
+        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
+                new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager(authenticationConfiguration), authorizationService, tokenGenerator);
+        // This will add new authentication provider in the list of existing authentication providers.
+        http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
     }
 
     /**
@@ -209,9 +215,65 @@ public class CamAuthorizationServerConfig {
         return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
     }
 
+    /**
+     * 自定义jwt，将权限信息放至jwt中
+     *
+     * @return
+     */
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> idTokenCustomizer() {
-        return new FederatedIdentityIdTokenCustomizer();
+//        return new FederatedIdentityIdTokenCustomizer();
+        return context -> {
+            // 检查用户信息是不是UserDetails 排除没有用户参与的流程
+            if (context.getPrincipal().getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) context.getPrincipal().getPrincipal();
+                // 获取申请的scopes
+                Set<String> scopes = context.getAuthorizedScopes();
+                // 获取用户的权限
+                Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+                // 提取权限转为字符串
+                Set<String> authoritySet = Optional.ofNullable(authorities).orElse(Collections.emptyList()).stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet());
+                // 合并scopes与用户信息
+                authoritySet.addAll(scopes);
+                JwtClaimsSet.Builder claims = context.getClaims();
+                // 将权限信息放入jwt的claim中，也可以生产一个指定字符串分割的字符传放入
+                claims.claim(SecurityConstants.AUTHORIZATION_KEY, authoritySet);
+                // 还可以继续放入其他信息
+            }
+        };
+    }
+
+    /**
+     * 自定义jwt解析器，设置解析出来的权限信息的前缀与在jwt中的key
+     *
+     * @return jwt解析器 JwtAuthenticationConverter
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        // 设置解析权限信息的前缀，设置为空是去掉前缀
+        grantedAuthoritiesConverter.setAuthorityPrefix("");
+        // 设置权限信息在jwt， claim中的key
+        grantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORIZATION_KEY);
+
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return authenticationConverter;
+    }
+
+
+    /**
+     * 将AuthenticationManager注入ioc中，其它需要使用地方可以直接从ioc中获取
+     *
+     * @param authenticationConfiguration 导出认证配置
+     * @return AuthenticationManager 认证管理器
+     */
+    @Bean
+    @SneakyThrows
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     /**
@@ -300,7 +362,7 @@ public class CamAuthorizationServerConfig {
 
     /**
      * 配置jwt解析器
-     * @param jwkSource
+     * @param jwkSource jwk源
      * @return
      */
     @Bean

@@ -1,5 +1,8 @@
 package com.inge.sso.authorize.server;
 
+import com.baomidou.mybatisplus.generator.FastAutoGenerator;
+import com.baomidou.mybatisplus.generator.config.OutputFile;
+import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,8 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -148,5 +150,33 @@ public class ServerAuthTest {
             return request;
         }
 
+    }
+
+    @Test
+    public void test() {
+        System.out.println("start...");
+        FastAutoGenerator.create("jdbc:mysql://192.168.3.100:3306/cam?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC", "root", "123456")
+                // 全局配置
+                .globalConfig((scanner, builder) -> builder.author(scanner.apply("lavyoung1325"))
+                        .outputDir("F://tmp")
+                )
+                // 包配置
+                .packageConfig((scanner, builder) -> builder.parent(scanner.apply("com.inge.sso.authorize.server"))
+                        .pathInfo(Collections.singletonMap(OutputFile.mapper, "F://tmp")))
+                // 策略配置
+                .strategyConfig((scanner, builder) -> builder.addInclude(getTables(scanner.apply("cam_user,cam_system_authority,cam_role_authority," +
+                                "cam_role,cam_user,role")))
+                        .addTablePrefix("cam_")
+                        .mapperBuilder().enableBaseResultMap().enableBaseColumnList().enableFileOverride()
+                        .controllerBuilder().enableRestStyle()
+                        .entityBuilder().enableLombok()
+                        .build())
+                .templateEngine(new FreemarkerTemplateEngine())
+                .execute();
+        System.out.println("end...");
+    }
+
+    protected static List<String> getTables(String tables) {
+        return "all".equals(tables) ? Collections.emptyList() : Arrays.asList(tables.split(","));
     }
 }

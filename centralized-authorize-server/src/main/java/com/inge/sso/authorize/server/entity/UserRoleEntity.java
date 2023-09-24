@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * 用户角色
  * @author lavyoung1325
  */
 @Data

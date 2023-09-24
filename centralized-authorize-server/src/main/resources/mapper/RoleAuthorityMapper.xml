@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.inge.sso.authorize.server.mapper.RoleAuthorityMapper">
+    <resultMap id="baseMap" type="com.inge.sso.authorize.server.entity.RoleAuthorityEntity">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="roleId" column="role_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="authorityId" column="authority_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+</mapper>

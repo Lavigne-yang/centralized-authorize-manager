@@ -60,4 +60,66 @@ CREATE TABLE oauth2_authorization
 );
 
 
+-- auto-generated definition
+create table cam_system_authority
+(
+    id             varchar(100)      not null comment '菜单ID'
+        primary key,
+    menu_name      varchar(150)      not null comment '菜单名称',
+    menu_parent_id varchar(100) null comment '父菜单ID',
+    path           varchar(255) null comment '图标路径',
+    authority      varchar(150) null comment '权限',
+    sort           int     default 0 not null comment '排序',
+    deleted        tinyint default 0 not null comment '是否删除 否：0，是：1',
+    createTime     bigint            not null comment '创建时间',
+    updateTime     bigint            not null comment '修改时间'
+) comment '系统菜单权限';
+
+create table cam_role_authority
+(
+    id           varchar(100) not null comment 'id',
+    role_id      varchar(100) not null comment '角色id',
+    authority_id varchar(100) not null comment '权限id',
+    constraint cam_role_authority_pk
+        primary key (id)
+) comment '角色权限表';
+
+create table cam_role
+(
+    id          varchar(100)      not null comment '角色id',
+    role_name   varchar(150)      not null comment '角色名称',
+    deleted     tinyint default 0 not null comment '是否删除',
+    sort        int     default 0 not null comment '排序',
+    create_time bigint            not null comment '创建时间',
+    update_time bigint            not null comment '修改时间',
+    constraint cam_role_pk
+        primary key (id)
+) comment '角色';
+
+-- auto-generated definition
+create table cam_user
+(
+    user_id     varchar(100)      not null comment '用户id'
+        primary key,
+    account     varchar(150)      not null comment '账户',
+    username    varchar(150)      not null comment '用户名',
+    password    varchar(200)      not null comment '密码',
+    mobile      varchar(30) null comment '手机号',
+    email       varchar(200)      not null comment '邮箱',
+    avatar_url  varchar(500) null comment '头像地址',
+    source_from tinyint default 1 not null comment '用户来源',
+    enable      tinyint(1) default 1 not null comment '是否启用',
+    create_time bigint            not null comment '创建时间',
+    update_time bigint            not null comment '更新时间'
+) comment '用户数据';
+
+-- auto-generated definition
+create table cam_user_role
+(
+    id      varchar(100) not null comment 'id'
+        primary key,
+    user_id varchar(100) not null comment '用户id',
+    role_id varchar(100) not null comment '角色id'
+) comment '用户角色';
+
 
