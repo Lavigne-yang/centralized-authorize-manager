@@ -6,7 +6,7 @@
         <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="roleName" column="role_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="deleted" column="deleted" javaType="java.lang.Integer" jdbcType="TINYINT"/>
-        <result property="sort" column="sort" javaType="java.lang.Integer" jdbcType="INT"/>
+        <result property="sort" column="sort" javaType="java.lang.Integer" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" javaType="java.lang.Long" jdbcType="BIGINT"/>
         <result property="updateTime" column="update_time" javaType="java.lang.Long" jdbcType="BIGINT"/>
     </resultMap>

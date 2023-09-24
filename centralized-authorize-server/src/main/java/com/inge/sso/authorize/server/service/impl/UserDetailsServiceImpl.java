@@ -43,31 +43,36 @@ public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> 
     private final IRoleAuthorityService roleAuthorityService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // username字段在用户登录时一般可能是用户账号、手机号、邮箱
-        // 因此数据库中存储的username字段可能是手机号、邮箱、也能都是，需要根据输入内容进行登录校验
-        UserEntity user = baseMapper.selectOne(Wrappers.lambdaQuery(UserEntity.class)
-                .or(o -> o.eq(UserEntity::getEmail, username))
-                .or(o -> o.eq(UserEntity::getMobile, username))
-                .or(o -> o.eq(UserEntity::getAccount, username)));
-        if (user == null) {
-            throw new UsernameNotFoundException("账号不存在");
+    public UserDetails loadUserByUsername(String username) {
+        UserEntity user = null;
+        try {
+            // username字段在用户登录时一般可能是用户账号、手机号、邮箱
+            // 因此数据库中存储的username字段可能是手机号、邮箱、也能都是，需要根据输入内容进行登录校验
+            user = baseMapper.selectOne(Wrappers.lambdaQuery(UserEntity.class)
+                    .or(o -> o.eq(UserEntity::getEmail, username))
+                    .or(o -> o.eq(UserEntity::getMobile, username))
+                    .or(o -> o.eq(UserEntity::getAccount, username)));
+            if (user == null) {
+                throw new UsernameNotFoundException("账号不存在");
+            }
+            // 查询用户关联的角色信息
+            List<UserRoleEntity> userRoleList = userRoleService.list(Wrappers.lambdaQuery(UserRoleEntity.class).eq(UserRoleEntity::getUserId, user.getUserId()));
+            List<String> roleIds = Optional.ofNullable(userRoleList).orElse(Collections.emptyList()).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
+            if (roleIds.isEmpty()) {
+                return user;
+            }
+            // 角色不为空需要返回用户的权限
+            List<RoleAuthorityEntity> roleAuthorityList = roleAuthorityService.list(Wrappers.lambdaQuery(RoleAuthorityEntity.class).in(RoleAuthorityEntity::getRoleId, roleIds));
+            List<String> authorityIds = Optional.ofNullable(roleAuthorityList).orElse(Collections.emptyList()).stream().map(RoleAuthorityEntity::getAuthorityId).collect(Collectors.toList());
+            if (authorityIds.isEmpty()) {
+                return user;
+            }
+            // 查询权限
+            List<AuthorityEntity> authorityList = authorityService.list(Wrappers.lambdaQuery(AuthorityEntity.class).in(AuthorityEntity::getId, authorityIds));
+            user.setAuthorities(authorityList);
+        } catch (Exception e) {
+            logger.error("error:", e);
         }
-        // 查询用户关联的角色信息
-        List<UserRoleEntity> userRoleList = userRoleService.list(Wrappers.lambdaQuery(UserRoleEntity.class).eq(UserRoleEntity::getUserId, user.getUserId()));
-        List<String> roleIds = Optional.ofNullable(userRoleList).orElse(Collections.emptyList()).stream().map(UserRoleEntity::getRoleId).collect(Collectors.toList());
-        if (roleIds.isEmpty()) {
-            return user;
-        }
-        // 角色不为空需要返回用户的权限
-        List<RoleAuthorityEntity> roleAuthorityList = roleAuthorityService.list(Wrappers.lambdaQuery(RoleAuthorityEntity.class).in(RoleAuthorityEntity::getRoleId, roleIds));
-        List<String> authorityIds = Optional.ofNullable(roleAuthorityList).orElse(Collections.emptyList()).stream().map(RoleAuthorityEntity::getAuthorityId).collect(Collectors.toList());
-        if (authorityIds.isEmpty()) {
-            return user;
-        }
-        // 查询权限
-        List<AuthorityEntity> authorityList = authorityService.list(Wrappers.lambdaQuery(AuthorityEntity.class).in(AuthorityEntity::getId, authorityIds));
-        user.setAuthorities(authorityList);
         return user;
     }
 }

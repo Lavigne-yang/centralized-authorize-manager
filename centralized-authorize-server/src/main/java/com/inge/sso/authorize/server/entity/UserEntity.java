@@ -23,7 +23,7 @@ public class UserEntity implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId("userId")
+    @TableId("user_id")
     private String userId;
     private String account;
     /**

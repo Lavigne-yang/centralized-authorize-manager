@@ -1,11 +1,12 @@
 package com.inge.sso.authorize.server.config;
 
-import com.inge.sso.authorize.common.constants.SecurityConstants;
+import com.inge.sso.authorize.common.constants.CamOauthConstants;
 import com.inge.sso.authorize.server.authorization.pwd.converter.OAuth2ResourceOwnerPasswordAuthenticationConverter;
 import com.inge.sso.authorize.server.authorization.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationFailureHandler;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationSuccessHandler;
 import com.inge.sso.authorize.server.utils.Jwks;
+import com.inge.sso.authorize.server.utils.OAuth2EndpointUtils;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -26,9 +27,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -52,7 +51,6 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -105,9 +103,11 @@ public class CamAuthorizationServerConfig {
                 .authorizeRequests(authorization -> authorization.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
                 .apply(authorizationServerConfigurer);
+        // 处理使用access token访问用户信息端点和客户端注册端点
+        httpSecurity.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
         DefaultSecurityFilterChain securityFilterChain = httpSecurity.formLogin(Customizer.withDefaults()).build();
         /*
-        Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner
+             Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner
          */
         addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity);
         return securityFilterChain;
@@ -154,7 +154,11 @@ public class CamAuthorizationServerConfig {
                         }))
                         .deleteCookies()
                 );
-
+        // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
+        http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults())
+                .accessDeniedHandler(OAuth2EndpointUtils::exceptionHandler)
+                .authenticationEntryPoint(OAuth2EndpointUtils::exceptionHandler)
+        );
         return http.build();
     }
 
@@ -239,7 +243,7 @@ public class CamAuthorizationServerConfig {
                 authoritySet.addAll(scopes);
                 JwtClaimsSet.Builder claims = context.getClaims();
                 // 将权限信息放入jwt的claim中，也可以生产一个指定字符串分割的字符传放入
-                claims.claim(SecurityConstants.AUTHORIZATION_KEY, authoritySet);
+                claims.claim(CamOauthConstants.AUTHORIZATION_KEY, authoritySet);
                 // 还可以继续放入其他信息
             }
         };
@@ -256,7 +260,7 @@ public class CamAuthorizationServerConfig {
         // 设置解析权限信息的前缀，设置为空是去掉前缀
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         // 设置权限信息在jwt， claim中的key
-        grantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORIZATION_KEY);
+        grantedAuthoritiesConverter.setAuthoritiesClaimName(CamOauthConstants.AUTHORIZATION_KEY);
 
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
@@ -336,19 +340,15 @@ public class CamAuthorizationServerConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("user1")
-                .password("$2a$10$.qdnTAO5.Oi4BTvTkc5j/e00M/yxBv63iXNXxtGSaFb8xi/vyOiYW")
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new BCryptPasswordEncoder().encode("111111"));
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        UserDetails user = User.builder()
+//                .username("user1")
+//                .password("$2a$10$.qdnTAO5.Oi4BTvTkc5j/e00M/yxBv63iXNXxtGSaFb8xi/vyOiYW")
+//                .roles("USER")
+//                .build();
+//        return new InMemoryUserDetailsManager(user);
+//    }
 
     @Bean
     public SessionRegistry sessionRegistry() {

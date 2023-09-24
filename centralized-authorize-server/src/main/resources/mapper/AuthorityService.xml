@@ -8,7 +8,7 @@
         <result property="menuParentId" column="menu_parent_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="path" column="path" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <result property="authority" column="authority" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        <result property="sort" column="sort" javaType="java.lang.Integer" jdbcType="INT"/>
+        <result property="sort" column="sort" javaType="java.lang.Integer" jdbcType="INTEGER"/>
         <result property="type" column="type" javaType="java.lang.Integer" jdbcType="TINYINT"/>
         <result property="deleted" column="deleted" javaType="java.lang.Integer" jdbcType="TINYINT"/>
         <result property="createTime" column="create_time" javaType="java.lang.Long" jdbcType="BIGINT"/>
