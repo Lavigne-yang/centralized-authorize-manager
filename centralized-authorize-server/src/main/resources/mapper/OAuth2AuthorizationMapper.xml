@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.inge.sso.authorize.server.mapper.OAuth2AuthorizationMapper">
+    <resultMap id="baseMap" type="com.inge.sso.authorize.server.entity.OAuth2AuthorizationEntity">
+        <id property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="registeredClientId" column="registered_client_id" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="principalName" column="principal_name" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="authorizationGrantType" column="authorization_grant_type"
+                javaType="org.springframework.security.oauth2.core.AuthorizationGrantType"
+                jdbcType="VARCHAR"/>
+        <result property="authorizedScopes" column="authorized_scopes" javaType="java.util.Set"
+                jdbcType="VARCHAR"/>
+        <result property="attributes" column="attributes" javaType="java.util.Map" jdbcType="VARCHAR"/>
+        <result property="state" column="state" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="authorizationCodeValue" column="authorization_code_value"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="authorizationCodeIssuedAt" column="authorization_code_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="authorizationCodeExpiresAt" column="authorization_code_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="authorizationCodeMetadata" column="authorization_code_metadata"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="accessTokenValue" column="access_token_value"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="accessTokenIssuedAt" column="access_token_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="accessTokenExpiresAt" column="access_token_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="accessTokenMetadata" column="access_token_metadata"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="accessTokenType" column="access_token_type"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="accessTokenScopes" column="access_token_scopes"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="oidcIdTokenValue" column="oidc_id_token_value"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="oidcIdTokenIssuedAt" column="oidc_id_token_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="oidcIdTokenExpiresAt" column="oidc_id_token_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="oidcIdTokenMetadata" column="oidc_id_token_metadata"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="refreshTokenValue" column="refresh_token_value"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+        <result property="refreshTokenIssuedAt" column="refresh_token_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="refreshTokenExpiresAt" column="refresh_token_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="timestamp"/>
+        <result property="refreshTokenMetadata" column="refresh_token_metadata"
+                javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
+    </resultMap>
+</mapper>

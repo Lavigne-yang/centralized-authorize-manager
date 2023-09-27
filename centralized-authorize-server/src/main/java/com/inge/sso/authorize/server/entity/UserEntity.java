@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.inge.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,7 @@ import java.util.Objects;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserEntity implements Serializable, UserDetails {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
     @TableId("user_id")
     private String userId;

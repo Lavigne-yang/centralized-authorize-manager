@@ -1,5 +1,6 @@
 package com.inge.sso.authorize.server.web;
 
+import com.inge.sso.authorize.server.service.IClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,12 +20,12 @@ public class ClientController {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
 
-    private final RegisteredClientRepository registeredClientRepository;
+    private final IClientService clientService;
 
     private final PasswordEncoder passwordEncoder;
 
-    public ClientController(RegisteredClientRepository registeredClientRepository, PasswordEncoder passwordEncoder) {
-        this.registeredClientRepository = registeredClientRepository;
+    public ClientController(IClientService clientService, PasswordEncoder passwordEncoder) {
+        this.clientService = clientService;
         this.passwordEncoder = passwordEncoder;
     }
 

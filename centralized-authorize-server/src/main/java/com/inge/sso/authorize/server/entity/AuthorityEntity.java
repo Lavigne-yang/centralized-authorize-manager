@@ -3,6 +3,7 @@ package com.inge.sso.authorize.server.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.inge.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -18,7 +19,7 @@ import java.util.Objects;
 @TableName("cam_system_authority")
 public class AuthorityEntity implements Serializable, GrantedAuthority {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;;
 
     private String id;
     private String menuName;

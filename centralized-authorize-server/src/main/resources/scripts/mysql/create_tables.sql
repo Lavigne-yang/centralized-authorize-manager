@@ -1,4 +1,5 @@
-CREATE TABLE oauth2_registered_client
+-- 授权客户端注册信息
+CREATE TABLE cam_oauth2_registered_client
 (
     id                            varchar(100)                            NOT NULL,
     client_id                     varchar(100)                            NOT NULL,
@@ -15,7 +16,8 @@ CREATE TABLE oauth2_registered_client
     PRIMARY KEY (id)
 );
 
-CREATE TABLE oauth2_authorization_consent
+-- 授权确认数据
+CREATE TABLE cam_oauth2_authorization_consent
 (
     registered_client_id varchar(100)  NOT NULL,
     principal_name       varchar(200)  NOT NULL,
@@ -28,8 +30,9 @@ CREATE TABLE oauth2_authorization_consent
 IMPORTANT:
     If using PostgreSQL, update ALL columns defined with 'blob' to 'text',
     as PostgreSQL does not support the 'blob' data type.
+ 客户端授权信息
 */
-CREATE TABLE oauth2_authorization
+CREATE TABLE cam_oauth2_authorization
 (
     id                            varchar(100) NOT NULL,
     registered_client_id          varchar(100) NOT NULL,
