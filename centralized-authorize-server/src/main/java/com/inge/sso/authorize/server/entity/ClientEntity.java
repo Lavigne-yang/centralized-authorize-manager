@@ -31,6 +31,8 @@ public class ClientEntity implements Serializable {
 
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
+    public static final String UPDATE_DATA = "UPDATE_DATA";
+
     @TableId("id")
     private String id;
     private String clientId;
@@ -53,6 +55,11 @@ public class ClientEntity implements Serializable {
     public static Builder from(RegisteredClient registeredClient) {
         Assert.notNull(registeredClient, "registeredClient cannot be null");
         return new Builder(registeredClient);
+    }
+
+    public static Builder fromUpdate(RegisteredClient registeredClient) {
+        Assert.notNull(registeredClient, "");
+        return new Builder(registeredClient, UPDATE_DATA);
     }
 
     @Data
@@ -87,6 +94,26 @@ public class ClientEntity implements Serializable {
             this.clientIdIssuedAt = registeredClient.getClientIdIssuedAt();
             this.clientSecret = registeredClient.getClientSecret();
             this.clientSecretExpiresAt = registeredClient.getClientSecretExpiresAt();
+            buildParameters(registeredClient);
+        }
+
+        protected Builder(RegisteredClient registeredClient, String type) {
+            this.id = registeredClient.getId();
+            if (!UPDATE_DATA.equals(type)) {
+                this.clientId = registeredClient.getClientId();
+                this.clientIdIssuedAt = registeredClient.getClientIdIssuedAt();
+                this.clientSecret = registeredClient.getClientSecret();
+                this.clientSecretExpiresAt = registeredClient.getClientSecretExpiresAt();
+            }
+            buildParameters(registeredClient);
+        }
+
+        /**
+         * 转换参数
+         *
+         * @param registeredClient
+         */
+        private void buildParameters(RegisteredClient registeredClient) {
             this.clientName = registeredClient.getClientName();
             if (!CollectionUtils.isEmpty(registeredClient.getClientAuthenticationMethods())) {
                 this.clientAuthenticationMethods.addAll(registeredClient.getClientAuthenticationMethods());

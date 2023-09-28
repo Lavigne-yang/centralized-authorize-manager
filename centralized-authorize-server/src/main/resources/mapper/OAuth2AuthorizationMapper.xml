@@ -21,10 +21,10 @@
                 jdbcType="VARCHAR"/>
         <result property="authorizationCodeIssuedAt" column="authorization_code_issued_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="authorizationCodeExpiresAt" column="authorization_code_expires_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="authorizationCodeMetadata" column="authorization_code_metadata"
                 javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
@@ -33,10 +33,10 @@
                 jdbcType="VARCHAR"/>
         <result property="accessTokenIssuedAt" column="access_token_issued_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="accessTokenExpiresAt" column="access_token_expires_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="accessTokenMetadata" column="access_token_metadata"
                 javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
@@ -51,10 +51,10 @@
                 jdbcType="VARCHAR"/>
         <result property="oidcIdTokenIssuedAt" column="oidc_id_token_issued_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="oidcIdTokenExpiresAt" column="oidc_id_token_expires_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="oidcIdTokenMetadata" column="oidc_id_token_metadata"
                 javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
@@ -63,10 +63,10 @@
                 jdbcType="VARCHAR"/>
         <result property="refreshTokenIssuedAt" column="refresh_token_issued_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="refreshTokenExpiresAt" column="refresh_token_expires_at"
                 javaType="java.time.Instant"
-                jdbcType="timestamp"/>
+                jdbcType="TIMESTAMP"/>
         <result property="refreshTokenMetadata" column="refresh_token_metadata"
                 javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
