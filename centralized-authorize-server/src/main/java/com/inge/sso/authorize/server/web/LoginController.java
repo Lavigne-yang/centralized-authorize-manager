@@ -3,7 +3,7 @@ package com.inge.sso.authorize.server.web;
 import com.inge.sso.authorize.common.dto.User;
 import com.inge.sso.authorize.common.exception.RegisterException;
 import com.inge.sso.authorize.server.entity.UserEntity;
-import com.inge.sso.authorize.server.service.IUserService;
+import com.inge.sso.authorize.server.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +23,11 @@ public class LoginController {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    private final IUserService userService;
+    private final UserService userService;
 
     private final PasswordEncoder passwordEncoder;
 
-    public LoginController(IUserService userService, PasswordEncoder passwordEncoder) {
+    public LoginController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }

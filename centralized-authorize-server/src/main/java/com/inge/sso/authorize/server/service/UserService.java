@@ -6,5 +6,5 @@ import com.inge.sso.authorize.server.entity.UserEntity;
 /**
  * @author lavyoung1325
  */
-public interface IUserService extends IService<UserEntity> {
+public interface UserService extends IService<UserEntity> {
 }

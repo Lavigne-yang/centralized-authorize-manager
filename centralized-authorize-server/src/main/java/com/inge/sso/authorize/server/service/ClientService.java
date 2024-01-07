@@ -6,5 +6,5 @@ import com.inge.sso.authorize.server.entity.ClientEntity;
 /**
  * @author lavyoung
  */
-public interface IClientService extends IService<ClientEntity>{
+public interface ClientService extends IService<ClientEntity> {
 }

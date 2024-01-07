@@ -4,12 +4,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.inge.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import lombok.Data;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author lavyoung1325
@@ -25,9 +22,9 @@ public class OAuth2AuthorizationEntity implements Serializable {
     private String id;
     private String registeredClientId;
     private String principalName;
-    private AuthorizationGrantType authorizationGrantType;
-    private Set<String> authorizedScopes;
-    private Map<String, Object> attributes;
+    private String authorizationGrantType;
+    private String authorizedScopes;
+    private String attributes;
     private String state;
     private String authorizationCodeValue;
     private Instant authorizationCodeIssuedAt;

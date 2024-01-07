@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -35,12 +34,7 @@ import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
@@ -75,8 +69,6 @@ public class CamAuthorizationServerConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(CamAuthorizationServerConfig.class);
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
-
-    private final JdbcTemplate jdbcTemplate;
 
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -191,32 +183,32 @@ public class CamAuthorizationServerConfig {
      *
      * @return
      */
-    @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        return new JdbcRegisteredClientRepository(jdbcTemplate);
-//        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("login-client")
-//                .clientSecret("{noop}openid-connect")
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .redirectUri("http://127.0.0.1:12000/login/oauth2/code/login-client")
-//                .redirectUri("http://127.0.0.1:12000/authorized")
-//                .scope(OidcScopes.OPENID)
-//                .scope(OidcScopes.PROFILE)
-//                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-//                .build();
-//        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("CAM")
-//                .clientSecret("{noop}secret")
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//                .scope("cam:read")
-//                .scope("cam:write")
-//                .build();
-//        repository.save(loginClient);
-//        repository.save(registeredClient);
-    }
+//     @Bean
+//     public RegisteredClientRepository registeredClientRepository() {
+//         return new JdbcRegisteredClientRepository(jdbcTemplate);
+// //        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
+// //                .clientId("login-client")
+// //                .clientSecret("{noop}openid-connect")
+// //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+// //                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+// //                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+// //                .redirectUri("http://127.0.0.1:12000/login/oauth2/code/login-client")
+// //                .redirectUri("http://127.0.0.1:12000/authorized")
+// //                .scope(OidcScopes.OPENID)
+// //                .scope(OidcScopes.PROFILE)
+// //                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+// //                .build();
+// //        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+// //                .clientId("CAM")
+// //                .clientSecret("{noop}secret")
+// //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+// //                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+// //                .scope("cam:read")
+// //                .scope("cam:write")
+// //                .build();
+// //        repository.save(loginClient);
+// //        repository.save(registeredClient);
+//     }
 
     /**
      * 基于db的oauth2的授权管理服务
@@ -224,10 +216,10 @@ public class CamAuthorizationServerConfig {
      * @param registeredClientRepository 客户端管理
      * @return
      */
-    @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-    }
+    // @Bean
+    // public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+    //     return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+    // }
 
     /**
      * 自定义jwt，将权限信息放至jwt中
@@ -321,10 +313,10 @@ public class CamAuthorizationServerConfig {
      *
      * @return
      */
-    @Bean
-    public OAuth2AuthorizationConsentService oAuth2AuthorizationService() {
-        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
-    }
+    // @Bean
+    // public OAuth2AuthorizationConsentService oAuth2AuthorizationService() {
+    //     return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
+    // }
 
 
     /**

@@ -5,6 +5,22 @@
     <resultMap id="baseMap" type="com.inge.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity">
         <id property="registeredClientId" column="registered_client_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
         <id property="principalName" column="principal_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
-        <result property="authorities" column="authorities" javaType="java.util.Set" jdbcType="VARCHAR"/>
+        <result property="authorities" column="authorities" javaType="java.lang.String" jdbcType="VARCHAR"/>
     </resultMap>
+    <update id="updateByClientIdAndPrincipalName"
+            parameterType="com.inge.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity">
+        UPDATE oauth2_authorization_consent
+        SET authorities = #{authorities}
+        WHERE registered_client_id = #{registeredClientId}
+          AND principal_name = #{principalName};
+    </update>
+
+
+    <delete id="deleteByClientIdAndPrincipalName"
+            parameterType="com.inge.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity">
+        DELETE
+        FROM oauth2_authorization_consent
+        WHERE registered_client_id = #{registeredClientId}
+          AND principal_name = #{principalName};
+    </delete>
 </mapper>

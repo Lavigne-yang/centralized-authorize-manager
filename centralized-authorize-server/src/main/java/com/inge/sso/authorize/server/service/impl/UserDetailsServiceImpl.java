@@ -7,10 +7,10 @@ import com.inge.sso.authorize.server.entity.RoleAuthorityEntity;
 import com.inge.sso.authorize.server.entity.UserEntity;
 import com.inge.sso.authorize.server.entity.UserRoleEntity;
 import com.inge.sso.authorize.server.mapper.UserMapper;
-import com.inge.sso.authorize.server.service.IAuthorityService;
-import com.inge.sso.authorize.server.service.IRoleAuthorityService;
-import com.inge.sso.authorize.server.service.IUserRoleService;
-import com.inge.sso.authorize.server.service.IUserService;
+import com.inge.sso.authorize.server.service.AuthorityService;
+import com.inge.sso.authorize.server.service.RoleAuthorityService;
+import com.inge.sso.authorize.server.service.UserRoleService;
+import com.inge.sso.authorize.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,15 +32,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserDetailsService, IUserService {
+public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserDetailsService, UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
-    private final IUserRoleService userRoleService;
+    private final UserRoleService userRoleService;
 
-    private final IAuthorityService authorityService;
+    private final AuthorityService authorityService;
 
-    private final IRoleAuthorityService roleAuthorityService;
+    private final RoleAuthorityService roleAuthorityService;
 
     @Override
     public UserDetails loadUserByUsername(String username) {

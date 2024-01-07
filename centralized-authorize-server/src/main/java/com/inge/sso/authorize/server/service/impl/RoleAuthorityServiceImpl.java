@@ -3,7 +3,7 @@ package com.inge.sso.authorize.server.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.inge.sso.authorize.server.entity.RoleAuthorityEntity;
 import com.inge.sso.authorize.server.mapper.RoleAuthorityMapper;
-import com.inge.sso.authorize.server.service.IRoleAuthorityService;
+import com.inge.sso.authorize.server.service.RoleAuthorityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,5 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class RoleAuthorityServiceImpl extends ServiceImpl<RoleAuthorityMapper, RoleAuthorityEntity> implements IRoleAuthorityService {
+public class RoleAuthorityServiceImpl extends ServiceImpl<RoleAuthorityMapper, RoleAuthorityEntity> implements RoleAuthorityService {
+
 }

@@ -36,6 +36,7 @@
         <mysql.version>8.0.33</mysql.version>
         <druid.version>1.2.18</druid.version>
         <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
+        <mybatisplus-plus.version>1.7.2-RELEASE</mybatisplus-plus.version>
     </properties>
 
     <!--版本管理-->

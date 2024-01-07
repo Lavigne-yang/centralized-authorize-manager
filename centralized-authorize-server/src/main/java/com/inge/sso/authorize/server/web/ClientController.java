@@ -1,11 +1,11 @@
 package com.inge.sso.authorize.server.web;
 
-import com.inge.sso.authorize.server.service.IClientService;
+import com.inge.sso.authorize.server.service.ClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -20,14 +20,12 @@ public class ClientController {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
 
-    private final IClientService clientService;
+    @Autowired
+    private ClientService clientService;
 
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public ClientController(IClientService clientService, PasswordEncoder passwordEncoder) {
-        this.clientService = clientService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
 
     @GetMapping("/activate")
