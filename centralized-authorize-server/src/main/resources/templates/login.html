@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="container">
-    <form class="form-signin w-100 m-auto" method="post" th:action="@{/login}">
+    <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
             Invalid username or password.
         </div>
@@ -18,12 +18,12 @@
         </div>
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
         <div class="form-floating">
-            <input type="text" id="username" name="username" class="form-control" required autofocus>
             <label for="username">Username</label>
+            <input type="text" id="username" name="username" class="form-control" required autofocus>
         </div>
         <div class="form-floating">
-            <input type="password" id="password" name="password" class="form-control" required>
             <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required>
         </div>
         <div>
             <button class="w-100 btn btn-lg btn-primary btn-block" type="submit">Sign in</button>

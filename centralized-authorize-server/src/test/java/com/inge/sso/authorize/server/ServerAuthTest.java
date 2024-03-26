@@ -61,7 +61,7 @@ public class ServerAuthTest {
         this.mockMvc.perform(post("/oauth2/token")
                         .param("grant_type", "client_credentials")
                         .param("scope", "cam:read")
-                        .with(basicAuth("bad", "password")))
+                        .with(basicAuth("CAM", "password")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("invalid_client"));
         // @formatter:on

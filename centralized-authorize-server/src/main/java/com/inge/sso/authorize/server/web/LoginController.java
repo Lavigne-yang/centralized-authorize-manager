@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Map;
+
 /**
  * 登录业务控制
  * @author lavyoung1325
@@ -63,5 +65,11 @@ public class LoginController {
         userEntity.setPassword(encode);
         userService.save(userEntity);
         return "/login";
+    }
+
+    @PostMapping("/user/login")
+    public String initLogin(Map<String, Object> params) {
+
+        return "login";
     }
 }
