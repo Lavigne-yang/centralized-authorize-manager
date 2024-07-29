@@ -37,6 +37,7 @@
         <druid.version>1.2.18</druid.version>
         <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
         <mybatisplus-plus.version>1.7.2-RELEASE</mybatisplus-plus.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
     <!--版本管理-->
@@ -89,19 +90,16 @@
                 <artifactId>centralized-authorize-common</artifactId>
                 <version>${centralized-authorize-manager.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-generator -->
             <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-generator</artifactId>
-                <version>3.5.3.2</version>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.apache.velocity/velocity-engine-core -->
             <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-engine-core</artifactId>
-                <version>2.3</version>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
