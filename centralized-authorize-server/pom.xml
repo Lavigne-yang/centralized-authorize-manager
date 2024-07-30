@@ -29,7 +29,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--TODO 待定...-->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-client</artifactId>
