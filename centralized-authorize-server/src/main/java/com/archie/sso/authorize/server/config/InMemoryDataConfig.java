@@ -2,6 +2,7 @@ package com.archie.sso.authorize.server.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 /**
@@ -15,32 +16,31 @@ public class InMemoryDataConfig {
      *
      * @return
      */
-    //     @Bean
-    //     public RegisteredClientRepository registeredClientRepository() {
-    //         return new JdbcRegisteredClientRepository(jdbcTemplate);
-    // //        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
-    // //                .clientId("login-client")
-    // //                .clientSecret("{noop}openid-connect")
-    // //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-    // //                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-    // //                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-    // //                .redirectUri("http://127.0.0.1:12000/login/oauth2/code/login-client")
-    // //                .redirectUri("http://127.0.0.1:12000/authorized")
-    // //                .scope(OidcScopes.OPENID)
-    // //                .scope(OidcScopes.PROFILE)
-    // //                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-    // //                .build();
-    // //        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-    // //                .clientId("CAM")
-    // //                .clientSecret("{noop}secret")
-    // //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-    // //                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-    // //                .scope("cam:read")
-    // //                .scope("cam:write")
-    // //                .build();
-    // //        repository.save(loginClient);
-    // //        repository.save(registeredClient);
-    //     }
+    @Bean
+    public RegisteredClientRepository registeredClientRepository() {
+        //        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        //                .clientId("login-client")
+        //                .clientSecret("{noop}openid-connect")
+        //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+        //                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        //                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+        //                .redirectUri("http://127.0.0.1:12000/login/oauth2/code/login-client")
+        //                .redirectUri("http://127.0.0.1:12000/authorized")
+        //                .scope(OidcScopes.OPENID)
+        //                .scope(OidcScopes.PROFILE)
+        //                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+        //                .build();
+        //        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+        //                .clientId("CAM")
+        //                .clientSecret("{noop}secret")
+        //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+        //                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+        //                .scope("cam:read")
+        //                .scope("cam:write")
+        //                .build();
+        //        repository.save(loginClient);
+        //        repository.save(registeredClient);
+    }
     
     //    @Bean
     //    public UserDetailsService userDetailsService() {

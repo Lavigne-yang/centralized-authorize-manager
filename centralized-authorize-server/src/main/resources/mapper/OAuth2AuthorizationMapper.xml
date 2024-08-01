@@ -75,5 +75,29 @@
         <result property="refreshTokenMetadata" column="refresh_token_metadata"
                 javaType="java.lang.String"
                 jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
+        <result property="userCodeValue" column="user_token_value"
+                javaType="java.lang.String"
+                jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
+        <result property="userCodeIssuedAt" column="user_token_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="TIMESTAMP" typeHandler="org.apache.ibatis.type.InstantTypeHandler"/>
+        <result property="userCodeExpiresAt" column="user_token_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="TIMESTAMP" typeHandler="org.apache.ibatis.type.InstantTypeHandler"/>
+        <result property="userCodeMetadata" column="user_token_metadata"
+                javaType="java.lang.String"
+                jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
+        <result property="deviceCodeValue" column="device_token_value"
+                javaType="java.lang.String"
+                jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
+        <result property="deviceCodeIssuedAt" column="device_token_issued_at"
+                javaType="java.time.Instant"
+                jdbcType="TIMESTAMP" typeHandler="org.apache.ibatis.type.InstantTypeHandler"/>
+        <result property="deviceCodeExpiresAt" column="device_token_expires_at"
+                javaType="java.time.Instant"
+                jdbcType="TIMESTAMP" typeHandler="org.apache.ibatis.type.InstantTypeHandler"/>
+        <result property="deviceCodeMetadata" column="device_token_metadata"
+                javaType="java.lang.String"
+                jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler"/>
     </resultMap>
 </mapper>

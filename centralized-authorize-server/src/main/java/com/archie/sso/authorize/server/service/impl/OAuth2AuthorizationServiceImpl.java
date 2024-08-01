@@ -12,9 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.lang.Nullable;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
@@ -28,12 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA
@@ -97,34 +90,34 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
         if (tokenType == null) {
             List<OAuth2AuthorizationEntity> sqlData = this.baseMapper.selectList(
                     Wrappers.lambdaQuery(OAuth2AuthorizationEntity.class)
-                    .eq(OAuth2AuthorizationEntity::getState, token)
-                    .or()
-                    .eq(OAuth2AuthorizationEntity::getAuthorizationCodeValue, token)
-                    .or()
-                    .eq(OAuth2AuthorizationEntity::getAccessTokenValue, token)
-                    .or()
-                    .eq(OAuth2AuthorizationEntity::getRefreshTokenValue, token)
+                            .eq(OAuth2AuthorizationEntity::getState, token)
+                            .or()
+                            .eq(OAuth2AuthorizationEntity::getAuthorizationCodeValue, token)
+                            .or()
+                            .eq(OAuth2AuthorizationEntity::getAccessTokenValue, token)
+                            .or()
+                            .eq(OAuth2AuthorizationEntity::getRefreshTokenValue, token)
             );
             return findBy(sqlData);
         } else if (OAuth2ParameterNames.STATE.equals(tokenType.getValue())) {
             List<OAuth2AuthorizationEntity> sqlData = this.baseMapper.selectList(
                     Wrappers.lambdaQuery(OAuth2AuthorizationEntity.class)
-                    .eq(OAuth2AuthorizationEntity::getState, token));
+                            .eq(OAuth2AuthorizationEntity::getState, token));
             return findBy(sqlData);
         } else if (OAuth2ParameterNames.CODE.equals(tokenType.getValue())) {
             List<OAuth2AuthorizationEntity> sqlData = this.baseMapper.selectList(
                     Wrappers.lambdaQuery(OAuth2AuthorizationEntity.class)
-                    .eq(OAuth2AuthorizationEntity::getAuthorizationCodeValue, token));
+                            .eq(OAuth2AuthorizationEntity::getAuthorizationCodeValue, token));
             return findBy(sqlData);
         } else if (OAuth2ParameterNames.ACCESS_TOKEN.equals(tokenType.getValue())) {
             List<OAuth2AuthorizationEntity> sqlData = this.baseMapper.selectList(
                     Wrappers.lambdaQuery(OAuth2AuthorizationEntity.class)
-                    .eq(OAuth2AuthorizationEntity::getAccessTokenValue, token));
+                            .eq(OAuth2AuthorizationEntity::getAccessTokenValue, token));
             return findBy(sqlData);
         } else if (OAuth2ParameterNames.REFRESH_TOKEN.equals(tokenType.getValue())) {
             List<OAuth2AuthorizationEntity> sqlData = this.baseMapper.selectList(
                     Wrappers.lambdaQuery(OAuth2AuthorizationEntity.class)
-                    .eq(OAuth2AuthorizationEntity::getRefreshTokenValue, token));
+                            .eq(OAuth2AuthorizationEntity::getRefreshTokenValue, token));
             return findBy(sqlData);
         }
         return null;
@@ -293,6 +286,20 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
             if (refreshToken.getMetadata() != null) {
                 entity.setRefreshTokenMetadata(writeMap(refreshToken.getMetadata()));
             }
+        }
+        OAuth2Authorization.Token<OAuth2UserCode> userCodeToken = authorization.getToken(OAuth2UserCode.class);
+        if (userCodeToken != null) {
+            entity.setUserCodeValue(userCodeToken.getToken().getTokenValue());
+            entity.setUserCodeIssuedAt(userCodeToken.getToken().getIssuedAt());
+            entity.setUserCodeExpiresAt(userCodeToken.getToken().getExpiresAt());
+            entity.setUserCodeMetadata(writeMap(userCodeToken.getMetadata()));
+        }
+        OAuth2Authorization.Token<OAuth2DeviceCode> deviceCodeToken = authorization.getToken(OAuth2DeviceCode.class);
+        if (deviceCodeToken != null) {
+            entity.setDeviceCodeValue(deviceCodeToken.getToken().getTokenValue());
+            entity.setDeviceCodeIssuedAt(deviceCodeToken.getToken().getIssuedAt());
+            entity.setDeviceCodeExpiresAt(deviceCodeToken.getToken().getExpiresAt());
+            entity.setDeviceCodeMetadata(writeMap(deviceCodeToken.getMetadata()));
         }
         return entity;
     }

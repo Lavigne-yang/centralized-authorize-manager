@@ -30,6 +30,7 @@ public class ClientEntity implements Serializable {
     private String clientAuthenticationMethods;
     private String authorizationGrantTypes;
     private String redirectUris;
+    private String postLogoutRedirectUri;
     private String scopes;
     private String clientSettings;
     private String tokenSettings;

@@ -26,6 +26,8 @@
         <result property="redirectUris" column="redirect_uris"
                 javaType="java.lang.String"
                 jdbcType="VARCHAR"/>
+        <result property="postLogoutRedirectUri" column="post_logout_redirect_uris" javaType="java.lang.String"
+                jdbcType="VARCHAR"/>
         <result property="scopes" column="scopes" javaType="String"
                 jdbcType="VARCHAR"/>
         <result property="clientSettings" column="client_settings"
