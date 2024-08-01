@@ -13,6 +13,10 @@
     <description>认证服务</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.inge.sso.authorize</groupId>
+            <artifactId>centralized-authorize-common</artifactId>
+        </dependency>
         <!--spring security 依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,11 +37,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-client</artifactId>
         </dependency>
-        <!-- security-cas 中央授权认证服务 -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-cas</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -56,8 +55,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -77,16 +76,16 @@
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.inge.sso.authorize</groupId>
-            <artifactId>centralized-authorize-common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
         </dependency>
     </dependencies>
 

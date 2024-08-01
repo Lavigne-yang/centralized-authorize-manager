@@ -89,21 +89,22 @@ public class AuthorizationConsentController {
 
     public static class ScopeWithDescription {
         private static final String DEFAULT_DESCRIPTION = "UNKNOWN SCOPE - We cannot provide information about this permission, use caution when granting this.";
-        private static final Map<String, String> scopeDescriptions = new HashMap<>();
+        
+        private static final Map<String, String> SCOPE_DESCRIPTIONS = new HashMap<>();
         static {
-            scopeDescriptions.put(
+            SCOPE_DESCRIPTIONS.put(
                     OidcScopes.PROFILE,
                     "This application will be able to read your profile information."
             );
-            scopeDescriptions.put(
+            SCOPE_DESCRIPTIONS.put(
                     "message.read",
                     "This application will be able to read your message."
             );
-            scopeDescriptions.put(
+            SCOPE_DESCRIPTIONS.put(
                     "message.write",
                     "This application will be able to add new messages. It will also be able to edit and delete existing messages."
             );
-            scopeDescriptions.put(
+            SCOPE_DESCRIPTIONS.put(
                     "other.scope",
                     "This is another scope example of a scope description."
             );
@@ -114,7 +115,22 @@ public class AuthorizationConsentController {
 
         ScopeWithDescription(String scope) {
             this.scope = scope;
-            this.description = scopeDescriptions.getOrDefault(scope, DEFAULT_DESCRIPTION);
+            this.description = SCOPE_DESCRIPTIONS.getOrDefault(scope, DEFAULT_DESCRIPTION);
+        }
+        
+        @Override
+        public String toString() {
+            return "ScopeWithDescription{" + "scope='" + scope + '\'' + ", description='" + description + '\'' + '}';
+        }
+        
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return super.equals(obj);
         }
     }
 

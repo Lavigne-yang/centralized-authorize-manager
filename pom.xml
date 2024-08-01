@@ -31,10 +31,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <oauth.server.version>1.3.1</oauth.server.version>
         <oauth.client.version>3.3.1</oauth.client.version>
-        <mysql.version>8.0.33</mysql.version>
-        <druid.version>1.2.18</druid.version>
+        <mysql.version>8.4.0</mysql.version>
+        <druid.version>1.2.23</druid.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <hutool.version>5.8.29</hutool.version>
     </properties>
 
     <!--版本管理-->
@@ -52,8 +53,8 @@
                 <version>${oauth.client.version}</version>
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
             <dependency>
@@ -80,6 +81,13 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
