@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.inge.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -15,7 +16,8 @@ import java.time.Instant;
 @Data
 @TableName("cam_oauth2_registered_client")
 public class ClientEntity implements Serializable {
-
+    
+    @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
     @TableId("id")

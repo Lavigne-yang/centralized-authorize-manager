@@ -2,6 +2,7 @@ package com.inge.sso.authorize.server.authorization.pwd.converter;
 
 import com.inge.sso.authorize.server.authorization.pwd.OAuth2ResourceOwnerPasswordAuthenticationToken;
 import com.inge.sso.authorize.server.utils.OAuth2EndpointUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -13,7 +14,6 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,4 +80,5 @@ public class OAuth2ResourceOwnerPasswordAuthenticationConverter implements Authe
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
         return new OAuth2ResourceOwnerPasswordAuthenticationToken(AuthorizationGrantType.PASSWORD, authentication, requestScopes, additionalParameters);
     }
+    
 }

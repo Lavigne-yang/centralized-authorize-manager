@@ -3,6 +3,8 @@ package com.inge.sso.authorize.server.utils;
 import com.inge.sso.authorize.common.constants.CamOauthConstants;
 import com.inge.sso.authorize.common.constants.ExceptionConstants;
 import com.inge.sso.authorize.common.utils.JsonUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +23,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;

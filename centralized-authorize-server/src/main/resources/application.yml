@@ -1,5 +1,71 @@
 server:
   port: 12000
+  servlet:
+    context-path: /cam
+spring:
+  application:
+    name: cam-authorization-server
+  thymeleaf:
+    cache: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.3.100:3306/cam
+    username: root
+    password: 123456
+  security:
+    oauth2:
+      client:
+        registration:
+          google-idp:
+            provider: google
+            client-id: ${GOOGLE_CLIENT_ID:google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:google-client-secret}
+            scope: openid, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/userinfo.email
+            client-name: Sign in with Google
+          github-idp:
+            provider: github
+            client-id: ${GITHUB_CLIENT_ID:github-client-id}
+            client-secret: ${GITHUB_CLIENT_SECRET:github-client-secret}
+            scope: user:email, read:user
+            client-name: Sign in with GitHub
+        provider:
+          google:
+            user-name-attribute: email
+          github:
+            user-name-attribute: login
+
+application:
+  security:
+    excludeUrls: #excludeUrls中存放白名单地址, 不需要经过授权
+      - "/favicon.ico"
+
+logging:
+  level:
+    root: debug
+
+
+# mybatis plus配置
+#mybatis-plus:
+#  mapper-locations: classpath:/mapper/*Mapper.xml
+#  global-config:
+#    # 关闭MP3.0自带的banner
+#    banner: true
+#    db-config:
+#      #主键类型  0:"数据库ID自增", 1:"不操作", 2:"用户输入ID",3:"数字型snowflake", 4:"全局唯一ID UUID", 5:"字符串型snowflake";
+#      id-type: AUTO
+#      #驼峰下划线w转换
+#      table-underline: true
+#      # 逻辑删除配置
+#      # 逻辑删除全局值（1表示已删除，这也是Mybatis Plus的默认配置）
+#      logic-delete-value: 1
+#      # 逻辑未删除全局值（0表示未删除，这也是Mybatis Plus的默认配置）
+#      logic-not-delete-value: 0
+#  configuration:
+#    #驼峰
+#    map-underscore-to-camel-case: true
+#    #打开二级缓存
+#    cache-enabled: true
+#    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

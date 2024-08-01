@@ -1,12 +1,10 @@
 package com.inge.sso.authorize.server.config;
 
 import com.inge.sso.authorize.common.constants.CamOauthConstants;
-import com.inge.sso.authorize.server.authorization.pwd.converter.OAuth2ResourceOwnerPasswordAuthenticationConverter;
 import com.inge.sso.authorize.server.authorization.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationFailureHandler;
 import com.inge.sso.authorize.server.federation.FederatedIdentityAuthenticationSuccessHandler;
 import com.inge.sso.authorize.server.utils.Jwks;
-import com.inge.sso.authorize.server.utils.OAuth2EndpointUtils;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -41,10 +39,6 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
-import org.springframework.security.oauth2.server.authorization.web.authentication.DelegatingAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -54,7 +48,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -84,19 +83,19 @@ public class CamAuthorizationServerConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
-        httpSecurity.apply(authorizationServerConfigurer.tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(
-                new DelegatingAuthenticationConverter(Arrays.asList(
-                        new OAuth2AuthorizationCodeAuthenticationConverter(),
-                        new OAuth2RefreshTokenAuthenticationConverter(),
-                        new OAuth2ClientCredentialsAuthenticationConverter(),
-                        new OAuth2ResourceOwnerPasswordAuthenticationConverter()
-                ))
-        )));
+        //        httpSecurity.apply(authorizationServerConfigurer.tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(
+        //                new DelegatingAuthenticationConverter(Arrays.asList(
+        //                        new OAuth2AuthorizationCodeAuthenticationConverter(),
+        //                        new OAuth2RefreshTokenAuthenticationConverter(),
+        //                        new OAuth2ClientCredentialsAuthenticationConverter(),
+        //                        new OAuth2ResourceOwnerPasswordAuthenticationConverter()
+        //                ))
+        //        )));
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
-        httpSecurity.requestMatcher(endpointsMatcher)
-                .authorizeRequests(authorization -> authorization.anyRequest().authenticated())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-                .apply(authorizationServerConfigurer);
+        //        httpSecurity.requestMatcher(endpointsMatcher)
+        //                .authorizeRequests(authorization -> authorization.anyRequest().authenticated())
+        //                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+        //                .apply(authorizationServerConfigurer);
         // 处理使用access token访问用户信息端点和客户端注册端点
         httpSecurity.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
         authorizationServerConfigurer.oidc(oidc -> {
@@ -118,56 +117,8 @@ public class CamAuthorizationServerConfig {
         addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity);
         return securityFilterChain;
     }
-
-
-    /**
-     * Spring Security的过滤器链，用于Spring Security的身份认证。
-     *
-     * @param http
-     * @return
-     * @throws Exception
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
-            throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                new OAuth2AuthorizationServerConfigurer();
-        http.apply(authorizationServerConfigurer);
-        http
-//                .formLogin(Customizer.withDefaults())
-//                .formLogin(form ->
-//                                form
-//                                        .loginPage(CUSTOM_LOGIN_PAGE_URI)
-//                                        .loginProcessingUrl(CUSTOM_LOGIN_PAGE_URI)
-////                                .successHandler(authenticationSuccessHandler())
-////                                .defaultSuccessUrl("/oauth2/consent", false)
-//                                        .failureForwardUrl("/error")
-////                                .failureHandler(authenticationFailureHandler())
-//                )
-                .authorizeHttpRequests(authorize -> authorize
-                        .mvcMatchers("/assets/**", "/webjars/**", "/login").permitAll()
-                        .antMatchers("/", "/error").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .addLogoutHandler(((request, response, authentication) -> {
-                            // TODO 注销处理，清理用户或客户端状态
-                            logger.info("request method: {}", request.getMethod());
-                            logger.info("{} logout success...", authentication.getName());
-                        }))
-                        .deleteCookies()
-                );
-        // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
-        http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults())
-                .accessDeniedHandler(OAuth2EndpointUtils::exceptionHandler)
-                .authenticationEntryPoint(OAuth2EndpointUtils::exceptionHandler)
-        );
-        return http.build();
-    }
-
+    
+    
     @SuppressWarnings("unchecked")
     private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) throws Exception {
         OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
