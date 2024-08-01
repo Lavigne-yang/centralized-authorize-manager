@@ -1,8 +1,6 @@
 package com.archie.sso.authorize.server.config;
 
 import com.archie.sso.authorize.common.constants.CamOauthConstants;
-import com.archie.sso.authorize.server.federation.FederatedIdentityAuthenticationFailureHandler;
-import com.archie.sso.authorize.server.federation.FederatedIdentityAuthenticationSuccessHandler;
 import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.archie.sso.authorize.server.utils.Jwks;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -16,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -32,11 +31,11 @@ import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
@@ -44,8 +43,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -66,22 +63,21 @@ import java.util.stream.Collectors;
 @Configuration
 @RequiredArgsConstructor
 public class CamAuthorizationServerConfig {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(CamAuthorizationServerConfig.class);
+    
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
-
+    
     private final AuthenticationConfiguration authenticationConfiguration;
-
+    
     /**
      * Spring security 的过滤器链，默认配置
-     *
      *
      * @param httpSecurity
      * @return
      * @throws Exception
      */
     @Bean
-    @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         //        httpSecurity.apply(authorizationServerConfigurer.tokenEndpoint(tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(
@@ -115,65 +111,34 @@ public class CamAuthorizationServerConfig {
         /*
              Custom configuration for Resource Owner Password grant type. Current implementation has no support for Resource Owner
          */
-        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity);
+        //        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity);
         return securityFilterChain;
     }
     
     
     @SuppressWarnings("unchecked")
     private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationService authorizationService = http.getSharedObject(OAuth2AuthorizationService.class);
         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
-        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
-                new OAuth2ResourceOwnerPasswordAuthenticationProvider(authenticationManager(authenticationConfiguration), authorizationService, tokenGenerator);
+        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider = new OAuth2ResourceOwnerPasswordAuthenticationProvider(
+                authenticationManager(authenticationConfiguration),
+                http.getSharedObject(OAuth2AuthorizationService.class), tokenGenerator);
         // This will add new authentication provider in the list of existing authentication providers.
         http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
     }
-
+    
+    
     /**
-     * 客户端Repository
+     * 基于db的oauth2的授权管理服务
      *
      * @return
      */
-//     @Bean
-//     public RegisteredClientRepository registeredClientRepository() {
-//         return new JdbcRegisteredClientRepository(jdbcTemplate);
-// //        RegisteredClient loginClient = RegisteredClient.withId(UUID.randomUUID().toString())
-// //                .clientId("login-client")
-// //                .clientSecret("{noop}openid-connect")
-// //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-// //                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-// //                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-// //                .redirectUri("http://127.0.0.1:12000/login/oauth2/code/login-client")
-// //                .redirectUri("http://127.0.0.1:12000/authorized")
-// //                .scope(OidcScopes.OPENID)
-// //                .scope(OidcScopes.PROFILE)
-// //                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-// //                .build();
-// //        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-// //                .clientId("CAM")
-// //                .clientSecret("{noop}secret")
-// //                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-// //                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-// //                .scope("cam:read")
-// //                .scope("cam:write")
-// //                .build();
-// //        repository.save(loginClient);
-// //        repository.save(registeredClient);
-//     }
-
-    /**
-     * 基于db的oauth2的授权管理服务
-     * @return
-     */
     @Bean
-    //     public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-    public OAuth2AuthorizationService authorizationService() {
-        //         return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-        
-        return new InMemoryOAuth2AuthorizationService();
+    @Order(Integer.MIN_VALUE)
+    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate,
+            RegisteredClientRepository registeredClientRepository) {
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
     }
-
+    
     /**
      * 自定义jwt，将权限信息放至jwt中
      *
@@ -181,7 +146,7 @@ public class CamAuthorizationServerConfig {
      */
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> idTokenCustomizer() {
-//        return new FederatedIdentityIdTokenCustomizer();
+        //        return new FederatedIdentityIdTokenCustomizer();
         return context -> {
             // 检查用户信息是不是UserDetails 排除没有用户参与的流程
             if (context.getPrincipal().getPrincipal() instanceof UserDetails) {
@@ -192,8 +157,7 @@ public class CamAuthorizationServerConfig {
                 Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
                 // 提取权限转为字符串
                 Set<String> authoritySet = Optional.ofNullable(authorities).orElse(Collections.emptyList()).stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toSet());
+                        .map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
                 // 合并scopes与用户信息
                 authoritySet.addAll(scopes);
                 JwtClaimsSet.Builder claims = context.getClaims();
@@ -203,7 +167,7 @@ public class CamAuthorizationServerConfig {
             }
         };
     }
-
+    
     /**
      * 自定义jwt解析器，设置解析出来的权限信息的前缀与在jwt中的key
      *
@@ -216,13 +180,13 @@ public class CamAuthorizationServerConfig {
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         // 设置权限信息在jwt， claim中的key
         grantedAuthoritiesConverter.setAuthoritiesClaimName(CamOauthConstants.AUTHORIZATION_KEY);
-
+        
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return authenticationConverter;
     }
-
-
+    
+    
     /**
      * 将AuthenticationManager注入ioc中，其它需要使用地方可以直接从ioc中获取
      *
@@ -231,12 +195,14 @@ public class CamAuthorizationServerConfig {
      */
     @Bean
     @SneakyThrows
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
+    
     /**
      * jwk源，使用非对称加密，公开用于检索匹配指定选择器的JWK的方法
+     *
      * @return
      */
     @Bean
@@ -245,22 +211,7 @@ public class CamAuthorizationServerConfig {
         JWKSet jwkSet = new JWKSet(rsaKey);
         return ((jwkSelector, securityContext) -> jwkSelector.select(jwkSet));
     }
-
-    /**
-     * 添加认证服务器配置，设置jwt签发者、默认端点请求地址等
-     *
-     * @return
-     */
-    @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                /**
-                 * 设置token签发地址（http(s)://{ip},{domain}:{port}/context-path）
-                 */
-                .issuer("http://localhost:12000")
-                .build();
-    }
-
+    
     /**
      * 基于db的授权确认管理服务
      *
@@ -270,21 +221,7 @@ public class CamAuthorizationServerConfig {
     // public OAuth2AuthorizationConsentService oAuth2AuthorizationService() {
     //     return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
     // }
-
-
-    /**
-     * 授權成功處理
-     *
-     * @return
-     */
-    private AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new FederatedIdentityAuthenticationSuccessHandler();
-    }
-
-    private AuthenticationFailureHandler authenticationFailureHandler() {
-        return new FederatedIdentityAuthenticationFailureHandler();
-    }
-
+    
     /**
      * 密码解析器，使用BCrypt的方式对密码进行加密和验证
      *
@@ -294,29 +231,23 @@ public class CamAuthorizationServerConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user = User.builder()
-//                .username("user1")
-//                .password("$2a$10$.qdnTAO5.Oi4BTvTkc5j/e00M/yxBv63iXNXxtGSaFb8xi/vyOiYW")
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
-
+    
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
     }
-
+    
+    /**
+     * @return
+     */
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }
-
+    
     /**
      * 配置jwt解析器
+     *
      * @param jwkSource jwk源
      * @return
      */

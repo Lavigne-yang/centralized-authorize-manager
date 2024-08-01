@@ -9,7 +9,7 @@
     </resultMap>
     <update id="updateByClientIdAndPrincipalName"
             parameterType="com.archie.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity">
-        UPDATE oauth2_authorization_consent
+        UPDATE cam_oauth2_authorization_consent
         SET authorities = #{authorities}
         WHERE registered_client_id = #{registeredClientId}
           AND principal_name = #{principalName};
@@ -19,7 +19,7 @@
     <delete id="deleteByClientIdAndPrincipalName"
             parameterType="com.archie.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity">
         DELETE
-        FROM oauth2_authorization_consent
+        FROM cam_oauth2_authorization_consent
         WHERE registered_client_id = #{registeredClientId}
           AND principal_name = #{principalName};
     </delete>

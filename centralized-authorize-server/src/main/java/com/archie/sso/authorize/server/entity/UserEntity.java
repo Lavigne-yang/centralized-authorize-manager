@@ -11,6 +11,7 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
@@ -25,7 +26,8 @@ import java.util.Objects;
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserEntity implements Serializable, UserDetails {
-
+    
+    @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
     @TableId("user_id")
@@ -55,7 +57,6 @@ public class UserEntity implements Serializable, UserDetails {
     /**
      * 用户权限
      *
-     * @return
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

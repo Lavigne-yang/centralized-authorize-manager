@@ -9,9 +9,10 @@ spring:
     cache: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.3.100:3306/cam
+    url: jdbc:mysql://192.168.1.59:3306/cam
     username: root
     password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
   security:
     oauth2:
       client:
@@ -45,4 +46,6 @@ mybatis-plus:
 
 logging:
   level:
-    root: debug
+    root: info
+    org.springframework.web: info
+    org.springframework.security: debug

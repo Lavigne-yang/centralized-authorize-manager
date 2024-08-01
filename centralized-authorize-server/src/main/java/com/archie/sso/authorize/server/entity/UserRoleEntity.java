@@ -4,6 +4,7 @@ import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -14,7 +15,8 @@ import java.util.Objects;
 @Data
 @TableName("cam_user_role")
 public class UserRoleEntity implements Serializable {
-
+    
+    @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
     private String id;

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,7 +16,8 @@ import java.util.Objects;
 @Data
 @TableName("cam_role")
 public class RoleEntity implements Serializable {
-
+    
+    @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
     private String id;
