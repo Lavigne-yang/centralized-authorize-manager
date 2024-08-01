@@ -3,6 +3,7 @@ package com.archie.sso.authorize.server.entity;
 import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -19,7 +20,7 @@ public class RoleEntity implements Serializable {
     
     @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
-
+    @TableId("id")
     private String id;
     private String roleName;
     private Integer deleted;

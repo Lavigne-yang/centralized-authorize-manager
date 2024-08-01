@@ -17,6 +17,7 @@ public class OAuth2AuthorizationConsentEntity implements Serializable {
     
     @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
+
     private String registeredClientId;
     private String principalName;
     private String authorities;

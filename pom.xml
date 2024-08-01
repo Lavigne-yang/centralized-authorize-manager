@@ -32,7 +32,7 @@
         <oauth.server.version>1.3.1</oauth.server.version>
         <oauth.client.version>3.3.1</oauth.client.version>
         <mysql.version>8.4.0</mysql.version>
-        <druid.version>1.2.23</druid.version>
+        <druid.version>1.2.20</druid.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <hutool.version>5.8.29</hutool.version>
@@ -65,7 +65,7 @@
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
+                <artifactId>druid-spring-boot-3-starter</artifactId>
                 <version>${druid.version}</version>
             </dependency>
             <dependency>
