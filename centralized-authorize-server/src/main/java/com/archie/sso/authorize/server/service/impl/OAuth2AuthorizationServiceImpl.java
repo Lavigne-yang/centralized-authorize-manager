@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -44,6 +45,7 @@ import java.util.Set;
  * @create 2023/9/28
  */
 @Service
+@RequiredArgsConstructor
 public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2AuthorizationMapper, OAuth2AuthorizationEntity> implements AuthorizationService, OAuth2AuthorizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthorizationServiceImpl.class);

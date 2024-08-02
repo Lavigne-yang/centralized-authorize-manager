@@ -66,6 +66,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
         Assert.hasText(clientId, "clientId cannot be empty");
         ClientEntity client = this.baseMapper.selectOne(
                 Wrappers.lambdaQuery(ClientEntity.class).eq(ClientEntity::getClientId, clientId));
+        Assert.notNull(client, "client don't exist");
         return rowToData(client);
     }
     
@@ -93,7 +94,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
                 clientEntity.getAuthorizationGrantTypes());
         Set<String> redirectUris = StringUtils.commaDelimitedListToSet(clientEntity.getRedirectUris());
         Set<String> postLogoutRedirectUris = StringUtils.commaDelimitedListToSet(
-                clientEntity.getPostLogoutRedirectUri());
+                clientEntity.getPostLogoutRedirectUris());
         Set<String> clientScopes = StringUtils.commaDelimitedListToSet(clientEntity.getScopes());
         RegisteredClient.Builder builder = RegisteredClient.withId(clientEntity.getId())
                 .clientId(clientEntity.getClientId()).clientIdIssuedAt(clientEntity.getClientIdIssuedAt())
@@ -144,7 +145,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
         client.setClientAuthenticationMethods(
                 StringUtils.collectionToCommaDelimitedString(clientAuthenticationMethods));
         client.setAuthorizationGrantTypes(StringUtils.collectionToCommaDelimitedString(authorizationGrantTypes));
-        client.setPostLogoutRedirectUri(
+        client.setPostLogoutRedirectUris(
                 StringUtils.collectionToCommaDelimitedString(registeredClient.getPostLogoutRedirectUris()));
         client.setRedirectUris(StringUtils.collectionToCommaDelimitedString(registeredClient.getRedirectUris()));
         client.setScopes(StringUtils.collectionToCommaDelimitedString(registeredClient.getScopes()));

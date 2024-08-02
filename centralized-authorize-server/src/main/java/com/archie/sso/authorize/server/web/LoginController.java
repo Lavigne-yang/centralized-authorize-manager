@@ -59,8 +59,8 @@ public class LoginController {
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user, userEntity);
         String encode = passwordEncoder.encode(user.getPassword());
-        if (StringUtils.isEmpty(user.getNickName())) {
-            userEntity.setNickName(user.getAccount());
+        if (StringUtils.isEmpty(user.getUsername())) {
+            userEntity.setUsername(user.getAccount());
         }
         userEntity.setPassword(encode);
         userService.save(userEntity);

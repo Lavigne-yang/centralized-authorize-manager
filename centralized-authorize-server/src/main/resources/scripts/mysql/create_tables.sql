@@ -1,5 +1,6 @@
+drop table if exists cam_oauth2_registered_client;
 -- 授权客户端注册信息
-CREATE TABLE oauth2_registered_client
+CREATE TABLE cam_oauth2_registered_client
 (
     id                            varchar(100)                            NOT NULL,
     client_id                     varchar(100)                            NOT NULL,
@@ -17,7 +18,7 @@ CREATE TABLE oauth2_registered_client
     PRIMARY KEY (id)
 );
 
-
+drop table if exists cam_oauth2_authorization_consent;
 -- 授权确认数据
 CREATE TABLE cam_oauth2_authorization_consent
 (
@@ -27,6 +28,7 @@ CREATE TABLE cam_oauth2_authorization_consent
     PRIMARY KEY (registered_client_id, principal_name)
 );
 
+drop table if exists cam_oauth2_authorization;
 -- 授权数据
 CREATE TABLE cam_oauth2_authorization
 (
@@ -66,7 +68,7 @@ CREATE TABLE cam_oauth2_authorization
     PRIMARY KEY (id)
 );
 
-
+drop table if exists cam_system_authority;
 -- auto-generated definition
 create table cam_system_authority
 (
@@ -82,6 +84,7 @@ create table cam_system_authority
     updateTime     bigint            not null comment '修改时间'
 ) comment '系统菜单权限';
 
+drop table if exists cam_role_authority;
 create table cam_role_authority
 (
     id           varchar(100) not null comment 'id',
@@ -91,6 +94,7 @@ create table cam_role_authority
         primary key (id)
 ) comment '角色权限表';
 
+drop table if exists cam_role;
 create table cam_role
 (
     id          varchar(100)      not null comment '角色id',
@@ -103,23 +107,24 @@ create table cam_role
         primary key (id)
 ) comment '角色';
 
+drop table if exists cam_user;
 -- auto-generated definition
 create table cam_user
 (
-    user_id     varchar(100)      not null comment '用户id'
-        primary key,
+    user_id     varchar(100)      not null comment '用户id' primary key,
     account     varchar(150)      not null comment '账户',
     username    varchar(150)      not null comment '用户名',
     password    varchar(200)      not null comment '密码',
-    mobile      varchar(30) null comment '手机号',
+    mobile      varchar(30)       null comment '手机号',
     email       varchar(200)      not null comment '邮箱',
-    avatar_url  varchar(500) null comment '头像地址',
+    avatar_url  varchar(500)      null comment '头像地址',
     source_from tinyint default 1 not null comment '用户来源',
     enable      tinyint(1) default 1 not null comment '是否启用',
     create_time bigint            not null comment '创建时间',
     update_time bigint            not null comment '更新时间'
 ) comment '用户数据';
 
+drop table if exists cam_user_role;
 -- auto-generated definition
 create table cam_user_role
 (
