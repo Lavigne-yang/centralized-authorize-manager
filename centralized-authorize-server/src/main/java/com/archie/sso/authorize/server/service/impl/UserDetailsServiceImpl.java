@@ -11,7 +11,7 @@ import com.archie.sso.authorize.server.service.UserRoleService;
 import com.archie.sso.authorize.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,16 +31,18 @@ import java.util.stream.Collectors;
  * @create 2023/9/24
  */
 @Service
-@RequiredArgsConstructor
 public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserDetailsService, UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
-
-    private final UserRoleService userRoleService;
-
-    private final AuthorityService authorityService;
-
-    private final RoleAuthorityService roleAuthorityService;
+    
+    @Resource
+    private UserRoleService userRoleService;
+    
+    @Resource
+    private AuthorityService authorityService;
+    
+    @Resource
+    private RoleAuthorityService roleAuthorityService;
 
     @Override
     public UserDetails loadUserByUsername(String username) {

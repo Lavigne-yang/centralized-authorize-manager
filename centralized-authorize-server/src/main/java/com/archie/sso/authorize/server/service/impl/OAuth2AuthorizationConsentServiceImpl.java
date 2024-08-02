@@ -5,7 +5,7 @@ import com.archie.sso.authorize.server.mapper.OAuth2AuthorizationConsentMapper;
 import com.archie.sso.authorize.server.service.AuthorizationConsentService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,8 +27,8 @@ import java.util.Set;
  */
 @Service
 public class OAuth2AuthorizationConsentServiceImpl extends ServiceImpl<OAuth2AuthorizationConsentMapper, OAuth2AuthorizationConsentEntity> implements OAuth2AuthorizationConsentService, AuthorizationConsentService {
-
-    @Autowired
+    
+    @Resource
     private RegisteredClientRepository registeredClientRepository;
 
     @Override

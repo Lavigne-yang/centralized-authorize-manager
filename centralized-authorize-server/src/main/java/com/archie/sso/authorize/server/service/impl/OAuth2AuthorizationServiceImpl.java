@@ -12,7 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.lang.Nullable;
-import org.springframework.security.oauth2.core.*;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2DeviceCode;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.OAuth2UserCode;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
@@ -26,7 +30,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA
@@ -125,7 +134,7 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
 
     private OAuth2Authorization findBy(Collection<OAuth2AuthorizationEntity> data) {
         List<OAuth2Authorization> authorizations = mapRow(data);
-        return !authorizations.isEmpty() ? authorizations.get(0) : null;
+        return !authorizations.isEmpty() ? authorizations.getFirst() : null;
     }
 
     private List<OAuth2Authorization> mapRow(Collection<OAuth2AuthorizationEntity> data) {
@@ -185,6 +194,18 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
                         item.getRefreshTokenValue(), item.getRefreshTokenIssuedAt(), item.getRefreshTokenExpiresAt());
                 builder.token(refreshToken, metadata -> metadata.putAll(refreshTokenMetadata));
             }
+            if (StringUtils.hasText(item.getUserCodeValue())) {
+                Map<String, Object> userCodeMetadata = parseMap(item.getUserCodeMetadata());
+                OAuth2UserCode oAuth2UserCode = new OAuth2UserCode(item.getUserCodeValue(), item.getUserCodeIssuedAt(),
+                        item.getUserCodeExpiresAt());
+                builder.token(oAuth2UserCode, metadata -> metadata.putAll(userCodeMetadata));
+            }
+            if (StringUtils.hasText(item.getDeviceCodeValue())) {
+                Map<String, Object> deviceCodeMetadata = parseMap(item.getDeviceCodeMetadata());
+                OAuth2DeviceCode oAuth2DeviceCode = new OAuth2DeviceCode(item.getDeviceCodeValue(),
+                        item.getDeviceCodeIssuedAt(), item.getDeviceCodeExpiresAt());
+                builder.token(oAuth2DeviceCode, metadata -> metadata.putAll(deviceCodeMetadata));
+            }
             mapResult.add(builder.build());
         });
         return mapResult;
@@ -192,7 +213,7 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
 
     private Map<String, Object> parseMap(String data) {
         try {
-            return this.objectMapper.readValue(data, new TypeReference<Map<String, Object>>() {
+            return this.objectMapper.readValue(data, new TypeReference<>() {
             });
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex.getMessage(), ex);
