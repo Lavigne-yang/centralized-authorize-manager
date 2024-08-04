@@ -1,19 +1,16 @@
 package com.archie.sso.authorize.server.service.impl;
 
-import com.archie.sso.authorize.server.entity.ClientEntity;
-import com.archie.sso.authorize.server.mapper.ClientMapper;
-import com.archie.sso.authorize.server.service.ClientService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Resource;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ConfigurationSettingNames;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
@@ -22,18 +19,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.archie.sso.authorize.server.entity.ClientEntity;
+import com.archie.sso.authorize.server.mapper.ClientMapper;
+import com.archie.sso.authorize.server.service.ClientService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author lavyoung1325
  * @since 1.0.0
  */
 @Service
-public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> implements ClientService, RegisteredClientRepository {
+public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> implements ClientService {
     
     private static final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
     
@@ -88,6 +89,9 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
      * @return
      */
     private RegisteredClient rowToData(ClientEntity clientEntity) {
+        if (clientEntity == null) {
+            return null;
+        }
         Set<String> clientAuthenticationMethods = StringUtils.commaDelimitedListToSet(
                 clientEntity.getClientAuthenticationMethods());
         Set<String> authorizationGrantTypes = StringUtils.commaDelimitedListToSet(
@@ -126,6 +130,9 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
      * @return
      */
     private ClientEntity dataToRow(RegisteredClient registeredClient) {
+        if (registeredClient == null) {
+            return null;
+        }
         ClientEntity client = new ClientEntity();
         Instant issuedAt =
                 registeredClient.getClientIdIssuedAt() != null ? registeredClient.getClientIdIssuedAt() : Instant.now();

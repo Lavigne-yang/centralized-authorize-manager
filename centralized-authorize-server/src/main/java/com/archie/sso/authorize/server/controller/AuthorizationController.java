@@ -1,9 +1,7 @@
 package com.archie.sso.authorize.server.controller;
 
-import com.archie.sso.authorize.common.exception.BusinessException;
-import com.archie.sso.authorize.server.service.ClientService;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,7 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import com.archie.sso.authorize.common.enums.BusinessCodeEnum;
+import com.archie.sso.authorize.common.exception.BusinessException;
+import com.archie.sso.authorize.server.service.ClientService;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 授权管理
@@ -26,25 +29,25 @@ import java.util.Set;
 @RequestMapping("/oauth2")
 @RequiredArgsConstructor
 public class AuthorizationController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationController.class);
-    
+
     private final PasswordEncoder passwordEncoder;
-    
+
     private final RegisteredClientRepository registeredClientRepository;
-    
+
     private final ClientService clientService;
-    
+
     /**
      * 请求授权
      *
-     * @param clientId     客户端ID
+     * @param clientId 客户端ID
      * @param clientSecret 客户端secret
      * @param responseType 响应方式
-     * @param redirectUrl  重定向url
-     * @param response     响应
+     * @param redirectUrl 重定向url
+     * @param response 响应
      */
-    @GetMapping("/authorize")
+    @GetMapping("/authorize1")
     public void authorize(@RequestParam("client_id") String clientId,
             @RequestParam("client_secret") String clientSecret, @RequestParam("response_type") String responseType,
             @RequestParam("redirect_url") String redirectUrl, HttpServletResponse response) {
@@ -66,12 +69,12 @@ public class AuthorizationController {
             if (!registeredClient.getRedirectUris().contains(redirectUrl)) {
                 throw new BusinessException("重定向url错误");
             }
-            // 2. 生成授权码 todo
-            
+            // 根据responseType走不同逻辑
+            // 重定向到登录地址，用户登录成功后才返回授权码
             response.sendRedirect("");
         } catch (Exception e) {
             logger.error("请求授权错误：", e);
-            throw new BusinessException("500");
+            throw new BusinessException(BusinessCodeEnum.SERVER_ERROR.getMessage());
         }
     }
 }

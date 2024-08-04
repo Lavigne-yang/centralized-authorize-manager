@@ -1,5 +1,7 @@
 package com.archie.sso.authorize.server.service;
 
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
+
 import com.archie.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,5 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author : lavyoung1325
  * @create 2023/9/28
  */
-public interface AuthorizationConsentService extends IService<OAuth2AuthorizationConsentEntity> {
+public interface AuthorizationConsentService extends IService<OAuth2AuthorizationConsentEntity>,
+        OAuth2AuthorizationConsentService {
 }

@@ -1,16 +1,13 @@
 package com.archie.sso.authorize.server.service.impl;
 
-import com.archie.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity;
-import com.archie.sso.authorize.server.mapper.OAuth2AuthorizationConsentMapper;
-import com.archie.sso.authorize.server.service.AuthorizationConsentService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.annotation.Resource;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
@@ -18,15 +15,21 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.archie.sso.authorize.server.entity.OAuth2AuthorizationConsentEntity;
+import com.archie.sso.authorize.server.mapper.OAuth2AuthorizationConsentMapper;
+import com.archie.sso.authorize.server.service.AuthorizationConsentService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import jakarta.annotation.Resource;
 
 /**
  * @author lavyoung1325
  */
 @Service
-public class OAuth2AuthorizationConsentServiceImpl extends ServiceImpl<OAuth2AuthorizationConsentMapper, OAuth2AuthorizationConsentEntity> implements OAuth2AuthorizationConsentService, AuthorizationConsentService {
+public class OAuth2AuthorizationConsentServiceImpl
+        extends ServiceImpl<OAuth2AuthorizationConsentMapper, OAuth2AuthorizationConsentEntity>
+        implements AuthorizationConsentService {
     
     @Resource
     private RegisteredClientRepository registeredClientRepository;

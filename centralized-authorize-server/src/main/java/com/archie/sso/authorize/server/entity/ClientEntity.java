@@ -1,13 +1,14 @@
 package com.archie.sso.authorize.server.entity;
 
-import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+
+import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import lombok.Data;
 
 /**
  * @author lavyoung1325
@@ -30,7 +31,6 @@ public class ClientEntity implements Serializable {
     private String clientAuthenticationMethods;
     private String authorizationGrantTypes;
     private String redirectUris;
-    
     private String postLogoutRedirectUris;
     private String scopes;
     private String clientSettings;

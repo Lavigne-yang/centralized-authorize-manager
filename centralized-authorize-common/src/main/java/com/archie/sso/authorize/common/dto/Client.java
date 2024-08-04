@@ -1,8 +1,9 @@
 package com.archie.sso.authorize.common.dto;
 
-import lombok.Data;
-
 import java.time.Instant;
+import java.util.List;
+
+import lombok.Data;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,25 +13,18 @@ import java.time.Instant;
  */
 @Data
 public class Client {
-    
+
     private String id;
     private String clientId;
     private Instant clientIdIssuedAt;
     private String clientSecret;
     private Instant clientSecretExpiresAt;
     private String clientName;
-    
-    private String clientAuthenticationMethods;
-    
-    private String authorizationGrantTypes;
-    
-    private String redirectUris;
-    
-    private String postLogoutRedirectUris;
-    
-    private String scopes;
-    
-    private String clientSettings;
-    
-    private String tokenSettings;
+    private List<String> clientAuthenticationMethods;
+    private List<String> authorizationGrantTypes;
+    private List<String> redirectUris;
+    private List<String> postLogoutRedirectUris;
+    private List<String> scopes;
+    private List<String> clientSettings;
+    private List<String> tokenSettings;
 }

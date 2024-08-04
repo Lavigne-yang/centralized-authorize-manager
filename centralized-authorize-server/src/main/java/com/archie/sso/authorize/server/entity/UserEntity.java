@@ -1,5 +1,13 @@
 package com.archie.sso.authorize.server.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -7,14 +15,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
+import lombok.Data;
 
 /**
  * create table cam_user
@@ -47,9 +49,6 @@ public class UserEntity implements Serializable, UserDetails {
     @TableId("user_id")
     private String userId;
     private String account;
-    /**
-     * 此为用户自定义、用户名可重复，不能用于登陆
-     */
     private String username;
     private String password;
     private String mobile;
