@@ -1,7 +1,13 @@
 package com.archie.sso.authorize.server.pwd.provider;
 
 
-import com.archie.sso.authorize.server.pwd.OAuth2ResourceOwnerPasswordAuthenticationToken;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +30,6 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
@@ -35,12 +40,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.archie.sso.authorize.server.pwd.OAuth2ResourceOwnerPasswordAuthenticationToken;
+import com.archie.sso.authorize.server.service.AuthorizationService;
 
 /**
  * @author lavyoung1325
@@ -51,7 +52,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
     private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
     private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE = new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
     private final AuthenticationManager authenticationManager;
-    private final OAuth2AuthorizationService authorizationService;
+    private final AuthorizationService authorizationService;
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
     /**
@@ -62,7 +63,8 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
      * @param tokenGenerator        the token generator
      * @since 1.0.0
      */
-    public OAuth2ResourceOwnerPasswordAuthenticationProvider(AuthenticationManager authenticationManager, OAuth2AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+    public OAuth2ResourceOwnerPasswordAuthenticationProvider(AuthenticationManager authenticationManager,
+            AuthorizationService authorizationService, OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
         Assert.notNull(authorizationService, "authorizationService cannot be null");
         Assert.notNull(tokenGenerator, "tokenGenerator cannot be null");
         this.authenticationManager = authenticationManager;
@@ -184,7 +186,7 @@ public class OAuth2ResourceOwnerPasswordAuthenticationProvider implements Authen
         logger.info("supports authentication={}, return:{}", authentication, supports);
         return supports;
     }
-    
+
     private Authentication getUsernamePasswordAuthentication(
             OAuth2ResourceOwnerPasswordAuthenticationToken resouceOwnerPasswordAuthentication) {
         Map<String, Object> additionalParameters = resouceOwnerPasswordAuthentication.getAdditionalParameters();

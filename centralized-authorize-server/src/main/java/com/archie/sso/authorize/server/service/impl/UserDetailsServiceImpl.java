@@ -1,5 +1,16 @@
 package com.archie.sso.authorize.server.service.impl;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
 import com.archie.sso.authorize.server.entity.AuthorityEntity;
 import com.archie.sso.authorize.server.entity.RoleAuthorityEntity;
 import com.archie.sso.authorize.server.entity.UserEntity;
@@ -11,36 +22,27 @@ import com.archie.sso.authorize.server.service.UserRoleService;
 import com.archie.sso.authorize.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.annotation.Resource;
 
 
 /**
  * Created by IntelliJ IDEA.
+ *
  * @Author : lavyoung1325
  * @create 2023/9/24
  */
 @Service
-public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserDetailsService, UserService {
+public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
-    
+
     @Resource
     private UserRoleService userRoleService;
-    
+
     @Resource
     private AuthorityService authorityService;
-    
+
     @Resource
     private RoleAuthorityService roleAuthorityService;
 

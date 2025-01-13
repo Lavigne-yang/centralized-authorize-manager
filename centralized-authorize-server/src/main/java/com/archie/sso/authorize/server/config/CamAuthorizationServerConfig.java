@@ -20,14 +20,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings.Builder;
@@ -48,7 +43,6 @@ import com.archie.sso.authorize.server.service.AuthorizationService;
 import com.archie.sso.authorize.server.service.ClientService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 /**
  * 授权服务配置
@@ -65,6 +59,8 @@ public class CamAuthorizationServerConfig {
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
 
     private final AuthenticationConfiguration authenticationConfiguration;
+
+    private final AuthenticationManager authenticationManager;
 
     private final AuthorizationService authorizationService;
 
@@ -92,7 +88,8 @@ public class CamAuthorizationServerConfig {
             ex.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint(CUSTOM_LOGIN_PAGE_URI),
                     new MediaTypeRequestMatcher(MediaType.ALL));
         }).oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
-        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity);
+        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity, authorizationService,
+                authenticationManager);
         logger.info("加载http security模块成功");
         return httpSecurity.build();
     }
@@ -133,12 +130,13 @@ public class CamAuthorizationServerConfig {
     }
 
     @SuppressWarnings("unchecked")
-    private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http) throws Exception {
+    private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http,
+            AuthorizationService authorizationService, AuthenticationManager authenticationManager) {
         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
         OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
                 new OAuth2ResourceOwnerPasswordAuthenticationProvider(
-                        authenticationManager(authenticationConfiguration),
-                        http.getSharedObject(OAuth2AuthorizationService.class), tokenGenerator);
+                        authenticationManager,
+                        authorizationService, tokenGenerator);
         // This will add new authentication provider in the list of existing authentication providers.
         http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
     }
@@ -212,28 +210,17 @@ public class CamAuthorizationServerConfig {
     /**
      * 将AuthenticationManager注入ioc中，其它需要使用地方可以直接从ioc中获取
      *
-     * @param authenticationConfiguration 导出认证配置
+     //* @param authenticationConfiguration 导出认证配置
      * @return AuthenticationManager 认证管理器
      */
-    @Bean
-    @SneakyThrows
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-            throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+    //    @Bean
+    //    @SneakyThrows
+    //    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+    //            throws Exception {
+    //        return authenticationConfiguration.getAuthenticationManager();
+    //    }
 
-    /**
-     * 密码解析器，使用BCrypt的方式对密码进行加密和验证
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
 
 
 }
