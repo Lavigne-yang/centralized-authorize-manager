@@ -9,9 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @MapperScan("com.archie.sso.authorize.server.mapper")
-public class CamAuthorizeServerApplication {
+public class CamAuthorizeServerApplication extends SpringApplication {
     
     public static void main(String[] args) {
-        SpringApplication.run(CamAuthorizeServerApplication.class, args);
+        run(CamAuthorizeServerApplication.class, args);
     }
+
+
 }

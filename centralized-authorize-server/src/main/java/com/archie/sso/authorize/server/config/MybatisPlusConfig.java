@@ -20,7 +20,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 public class MybatisPlusConfig {
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.data.datasource")
+    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource dataSource() {
         return new DruidDataSource();
     }

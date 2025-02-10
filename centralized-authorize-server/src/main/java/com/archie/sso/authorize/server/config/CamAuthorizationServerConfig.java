@@ -100,7 +100,8 @@ public class CamAuthorizationServerConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         logger.info("加载默认http security模块");
         http.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults()).logout(Customizer.withDefaults())
+                .oauth2ResourceServer(Customizer.withDefaults());
         logger.info("加载默认http security模块");
         return http.build();
     }
@@ -157,7 +158,7 @@ public class CamAuthorizationServerConfig {
      */
     public AuthorizationServerSettings authorizationServerSettings() {
         Builder builder = AuthorizationServerSettings.builder()
-                .authorizationEndpoint("/oauth2/authorize1")
+                .authorizationEndpoint("/oauth2/authorize")
                 .issuer("http://localhost:12000");
         return builder.build();
     }
