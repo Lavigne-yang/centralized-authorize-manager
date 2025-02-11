@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>com.archie.sso.authorize</groupId>
-            <artifactId>centralized-authorize-common</artifactId>
+            <artifactId>centralized-authorize-entity</artifactId>
         </dependency>
         <!--spring security 依赖-->
         <dependency>

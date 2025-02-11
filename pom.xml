@@ -21,6 +21,7 @@
         <module>centralized-authorize-server</module>
         <module>centralized-authorize-client</module>
         <module>centralized-authorize-common</module>
+        <module>centralized-authorize-entity</module>
     </modules>
 
     <!--属性配置-->
@@ -69,16 +70,15 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-starter-jdbc</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.archie.sso.authorize</groupId>
                 <artifactId>centralized-authorize-common</artifactId>
+                <version>${centralized-authorize-manager.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.archie.sso.authorize</groupId>
+                <artifactId>centralized-authorize-entity</artifactId>
                 <version>${centralized-authorize-manager.version}</version>
             </dependency>
             <dependency>
