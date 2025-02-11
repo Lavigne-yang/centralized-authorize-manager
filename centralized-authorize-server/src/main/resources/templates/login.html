@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="container">
-    <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login}">
+    <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login.action}">
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
             Invalid username or password.
         </div>
@@ -18,15 +18,15 @@
         </div>
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
         <div class="form-floating">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required autofocus>
+            <label for="un">Username</label>
+            <input type="text" id="un" name="un" class="form-control" required autofocus>
         </div>
         <div class="form-floating">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" class="form-control" required>
+            <label for="pw">Password</label>
+            <input type="password" id="pw" name="pw" class="form-control" required>
         </div>
         <div>
-            <button class="w-100 btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            <button class="w-100 btn btn-lg btn-primary btn-block" type="submit">登录</button>
             <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/google-idp" role="link" style="margin-top: 10px">
                 <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20" style="margin-right: 5px;" alt="Sign in with Google">
                 Sign in with Google

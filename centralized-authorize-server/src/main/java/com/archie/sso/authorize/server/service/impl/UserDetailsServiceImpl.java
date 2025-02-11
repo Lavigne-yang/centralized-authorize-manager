@@ -1,16 +1,5 @@
 package com.archie.sso.authorize.server.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
-
 import com.archie.sso.authorize.server.entity.AuthorityEntity;
 import com.archie.sso.authorize.server.entity.RoleAuthorityEntity;
 import com.archie.sso.authorize.server.entity.UserEntity;
@@ -22,8 +11,18 @@ import com.archie.sso.authorize.server.service.UserRoleService;
 import com.archie.sso.authorize.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -45,6 +44,21 @@ public class UserDetailsServiceImpl extends ServiceImpl<UserMapper, UserEntity> 
 
     @Resource
     private RoleAuthorityService roleAuthorityService;
+    
+    @Resource
+    private PasswordEncoder passwordEncoder;
+    
+    //    @PostConstruct
+    //    public void init() {
+    //        UserEntity user = new UserEntity();
+    //        user.setUserId(IdWorker.get32UUID());
+    //        user.setAccount("admin");
+    //        user.setMobile("18173067573");
+    //        user.setEmail("3208861258@qq.com");
+    //        user.setPassword(passwordEncoder.encode("admin"));
+    //        save(user);
+    //        logger.info("UserDetailsServiceImpl init");
+    //    }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
