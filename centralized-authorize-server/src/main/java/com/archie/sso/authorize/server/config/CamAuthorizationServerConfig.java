@@ -1,6 +1,8 @@
 package com.archie.sso.authorize.server.config;
 
 import com.archie.sso.authorize.common.constants.CamOauthConstants;
+import com.archie.sso.authorize.server.handler.UserLoginFailureHandler;
+import com.archie.sso.authorize.server.handler.UserLoginSuccessHandler;
 import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
 import com.archie.sso.authorize.server.service.AuthorizationConsentService;
 import com.archie.sso.authorize.server.service.AuthorizationService;
@@ -172,7 +174,9 @@ public class CamAuthorizationServerConfig {
                 .authorizeHttpRequests((authorize) -> authorize.requestMatchers("/login", "/error").permitAll()
                         .anyRequest().authenticated())
                 // 配置表单登录
-                .formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login1")
+                .formLogin(
+                        form -> form.loginProcessingUrl("/login.action").successHandler(new UserLoginSuccessHandler())
+                                .failureHandler(new UserLoginFailureHandler())
                         .defaultSuccessUrl("/index", true)).logout(Customizer.withDefaults())
                 // 禁用CSRF保护，以便简化示例
                 .csrf(AbstractHttpConfigurer::disable)

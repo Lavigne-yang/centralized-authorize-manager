@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cam Authorization Server</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css" th:href="@{/assets/css/bootstrap.min.css}" />
-    <link rel="stylesheet" type="text/css" href="/assets/css/signin.css" th:href="@{/assets/css/signin.css}"/>
+    <link rel="stylesheet" type="text/css" href="/static/assets/css/bootstrap.min.css"
+          th:href="@{/assets/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" href="/static/assets/css/signin.css" th:href="@{/assets/css/signin.css}"/>
 </head>
 <body>
 <div class="container">
-    <form class="form-signin w-100 m-auto" method="post" th:action="@{/user/login.action}">
+    <form id="loginForm" class="form-signin w-100 m-auto" method="post" th:action="@{/user/login.action}">
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
             Invalid username or password.
         </div>
@@ -38,5 +39,38 @@
         </div>
     </form>
 </div>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+    
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+    
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+        console.log(response)
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/'; // 登录成功后的重定向
+            } else {
+                alert('登录失败，请检查用户名和密码');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('登录过程中发生错误');
+        });
+    });
+</script>
 </body>
 </html>

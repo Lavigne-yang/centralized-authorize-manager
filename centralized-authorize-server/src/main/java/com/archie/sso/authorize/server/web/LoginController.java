@@ -10,13 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 登录业务控制
@@ -54,36 +51,36 @@ public class LoginController {
         return "/login";
     }
     
-    @PostMapping("/user/login.action")
-    public String login(@RequestParam("un") String username, @RequestParam("pw") String password, Model model) {
-        // 输入验证
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            logger.warn("用户名或密码为空");
-            model.addAttribute("error", "用户名或密码不能为空");
-            return "/login";
-        }
-        try {
-            UserDetails userDetails = userService.loadUserByUsername(username);
-            if (userDetails == null) {
-                logger.error("用户不存在");
-                model.addAttribute("error", "用户不存在");
-                return "/login";
-            }
-            
-            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-                logger.warn("密码不正确");
-                model.addAttribute("error", "密码不正确");
-                return "/login";
-            }
-            
-            logger.info("用户登录成功: {}", userDetails.getUsername());
-            return "/index";
-        } catch (Exception e) {
-            logger.error("登录过程中发生异常", e);
-            model.addAttribute("error", "系统错误，请稍后再试");
-            return "/login";
-        }
-    }
+    //    @PostMapping("/user/login.action")
+    //    public String login(@RequestParam("un") String username, @RequestParam("pw") String password, Model model) {
+    //        // 输入验证
+    //        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+    //            logger.warn("用户名或密码为空");
+    //            model.addAttribute("error", "用户名或密码不能为空");
+    //            return "/login";
+    //        }
+    //        try {
+    //            UserDetails userDetails = userService.loadUserByUsername(username);
+    //            if (userDetails == null) {
+    //                logger.error("用户不存在");
+    //                model.addAttribute("error", "用户不存在");
+    //                return "/login";
+    //            }
+    //
+    //            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+    //                logger.warn("密码不正确");
+    //                model.addAttribute("error", "密码不正确");
+    //                return "/login";
+    //            }
+    //
+    //            logger.info("用户登录成功: {}", userDetails.getUsername());
+    //            return "/index";
+    //        } catch (Exception e) {
+    //            logger.error("登录过程中发生异常", e);
+    //            model.addAttribute("error", "系统错误，请稍后再试");
+    //            return "/login";
+    //        }
+    //    }
     
     
 }
