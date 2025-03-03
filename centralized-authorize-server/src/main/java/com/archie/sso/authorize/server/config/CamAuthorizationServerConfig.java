@@ -7,6 +7,7 @@ import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordA
 import com.archie.sso.authorize.server.service.AuthorizationConsentService;
 import com.archie.sso.authorize.server.service.AuthorizationService;
 import com.archie.sso.authorize.server.service.ClientService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,18 +58,30 @@ public class CamAuthorizationServerConfig {
     private static final Logger logger = LoggerFactory.getLogger(CamAuthorizationServerConfig.class);
 
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
-
+    
+    @NonNull
     private final AuthenticationConfiguration authenticationConfiguration;
-
+    
+    @NonNull
     private final AuthenticationManager authenticationManager;
-
+    
+    @NonNull
     private final AuthorizationService authorizationService;
-
+    
+    @NonNull
     private final ClientService clientService;
-
+    
+    @NonNull
     private final AuthorizationConsentService authorizationConsentService;
-
+    
+    @NonNull
     private final OAuth2TokenGenerator<OAuth2Token> auth2TokenGenerator;
+    
+    @NonNull
+    private final UserLoginSuccessHandler userLoginSuccessHandler;
+    
+    @NonNull
+    private final UserLoginFailureHandler userLoginFailureHandler;
 
     /**
      * Spring security 的过滤器链
@@ -99,8 +112,8 @@ public class CamAuthorizationServerConfig {
                     new MediaTypeRequestMatcher(MediaType.ALL));
         }).oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
         // 添加自定义的OAuth2资源所有者密码认证提供者
-        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity, authorizationService,
-                authenticationManager);
+        //        addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(httpSecurity, authorizationService,
+        //                authenticationManager);
         // 记录日志，成功加载http security模块
         logger.info("加载http security模块成功");
         // 构建并返回配置好的SecurityFilterChain对象
@@ -174,10 +187,9 @@ public class CamAuthorizationServerConfig {
                 .authorizeHttpRequests((authorize) -> authorize.requestMatchers("/login", "/error").permitAll()
                         .anyRequest().authenticated())
                 // 配置表单登录
-                .formLogin(
-                        form -> form.loginProcessingUrl("/login.action").successHandler(new UserLoginSuccessHandler())
-                                .failureHandler(new UserLoginFailureHandler())
-                        .defaultSuccessUrl("/index", true)).logout(Customizer.withDefaults())
+                .formLogin(form -> form.loginProcessingUrl("/login.action").successHandler(userLoginSuccessHandler)
+                        .failureHandler(userLoginFailureHandler).defaultSuccessUrl("/index", false))
+                .logout(Customizer.withDefaults())
                 // 禁用CSRF保护，以便简化示例
                 .csrf(AbstractHttpConfigurer::disable)
                 // 应用OAuth2授权服务器配置器
@@ -274,22 +286,6 @@ public class CamAuthorizationServerConfig {
         authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return authenticationConverter;
     }
-
-
-    /**
-     * 将AuthenticationManager注入ioc中，其它需要使用地方可以直接从ioc中获取
-     *
-     //* @param authenticationConfiguration 导出认证配置
-     * @return AuthenticationManager 认证管理器
-     */
-    //    @Bean
-    //    @SneakyThrows
-    //    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-    //            throws Exception {
-    //        return authenticationConfiguration.getAuthenticationManager();
-    //    }
-
-
 
 
 }
