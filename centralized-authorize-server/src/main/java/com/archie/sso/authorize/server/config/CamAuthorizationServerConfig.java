@@ -1,6 +1,8 @@
 package com.archie.sso.authorize.server.config;
 
 import com.archie.sso.authorize.common.constants.CamOauthConstants;
+import com.archie.sso.authorize.server.authorization.pwd.converter.PasswordGrantAuthenticationConverter;
+import com.archie.sso.authorize.server.authorization.pwd.provider.PasswordGrantAuthenticationProvider;
 import com.archie.sso.authorize.server.handler.UserLoginFailureHandler;
 import com.archie.sso.authorize.server.handler.UserLoginSuccessHandler;
 import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
@@ -54,9 +56,9 @@ import java.util.stream.Collectors;
 @Configuration
 @RequiredArgsConstructor
 public class CamAuthorizationServerConfig {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(CamAuthorizationServerConfig.class);
-
+    
     private static final String CUSTOM_LOGIN_PAGE_URI = "/login";
     
     @NonNull
@@ -82,11 +84,9 @@ public class CamAuthorizationServerConfig {
     
     @NonNull
     private final UserLoginFailureHandler userLoginFailureHandler;
-
+    
     /**
-     * Spring security 的过滤器链
-     * 该方法配置了Web安全属性，包括HTTP基本认证、OAuth2授权服务器配置、资源服务器配置等
-     * 主要目的是为了保护Web应用程序免受各种攻击，如跨站请求伪造（CSRF）、点击劫持等
+     * Spring security 的过滤器链 该方法配置了Web安全属性，包括HTTP基本认证、OAuth2授权服务器配置、资源服务器配置等 主要目的是为了保护Web应用程序免受各种攻击，如跨站请求伪造（CSRF）、点击劫持等
      * 同时，它也配置了自定义的安全属性，如自定义登录页面、OpenID支持等
      *
      * @param httpSecurity 用于配置Web安全属性的HttpSecurity对象
@@ -166,26 +166,26 @@ public class CamAuthorizationServerConfig {
      */
     private void applyCustomSecurity(HttpSecurity http) throws Exception {
         // 注册配置
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                new OAuth2AuthorizationServerConfigurer();
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         authorizationServerConfigurer.setBuilder(http);
         authorizationServerConfigurer.authorizationService(authorizationService);
         authorizationServerConfigurer.registeredClientRepository(clientService);
         authorizationServerConfigurer.authorizationConsentService(authorizationConsentService);
         authorizationServerConfigurer.tokenGenerator(auth2TokenGenerator);
-        
+        // 自定义的密码登录转换器和认证提供者
+        authorizationServerConfigurer.tokenEndpoint(
+                tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(new PasswordGrantAuthenticationConverter())
+                        .authenticationProvider(new PasswordGrantAuthenticationProvider()));
         authorizationServerConfigurer.authorizationServerSettings(authorizationServerSettings());
-    
+        
         // 获取端点匹配器
-        RequestMatcher endpointsMatcher = authorizationServerConfigurer
-                .getEndpointsMatcher();
-    
+        RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+        
         // 配置HttpSecurity
         http
                 // 确保所有端点都要求身份验证
-                .securityMatcher(endpointsMatcher)
-                .authorizeHttpRequests((authorize) -> authorize.requestMatchers("/login", "/error").permitAll()
-                        .anyRequest().authenticated())
+                .securityMatcher(endpointsMatcher).authorizeHttpRequests(
+                        (authorize) -> authorize.requestMatchers("/login", "/error").permitAll().anyRequest().authenticated())
                 // 配置表单登录
                 .formLogin(form -> form.loginProcessingUrl("/login.action").successHandler(userLoginSuccessHandler)
                         .failureHandler(userLoginFailureHandler).defaultSuccessUrl("/index", false))
@@ -195,36 +195,22 @@ public class CamAuthorizationServerConfig {
                 // 应用OAuth2授权服务器配置器
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
     }
-
+    
     @SuppressWarnings("unchecked")
     private void addCustomOAuth2ResourceOwnerPasswordAuthenticationProvider(HttpSecurity http,
             AuthorizationService authorizationService, AuthenticationManager authenticationManager) {
         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator = http.getSharedObject(OAuth2TokenGenerator.class);
-        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider =
-                new OAuth2ResourceOwnerPasswordAuthenticationProvider(
-                        authenticationManager,
-                        authorizationService, tokenGenerator);
+        OAuth2ResourceOwnerPasswordAuthenticationProvider resourceOwnerPasswordAuthenticationProvider = new OAuth2ResourceOwnerPasswordAuthenticationProvider(
+                authenticationManager, authorizationService, tokenGenerator);
         // This will add new authentication provider in the list of existing authentication providers.
         http.authenticationProvider(resourceOwnerPasswordAuthenticationProvider);
     }
     
     /**
      * 配置授权服务器的设置
-     *
-     * 此方法定义了授权服务器的相关端点和配置信息，包括：
-     * - 客户端注册端点
-     * - 授权端点
-     * - 令牌端点
-     * - 登录注销端点
-     * - 设备验证端点
-     * - 发行者URL
-     * - 是否允许多个发行者
-     * - 设备授权端点
-     * - JWK集合端点
-     * - 令牌撤销端点
-     * - 用户信息端点
-     * - 令牌检查端点
-     * 授权配置地址
+     * <p>
+     * 此方法定义了授权服务器的相关端点和配置信息，包括： - 客户端注册端点 - 授权端点 - 令牌端点 - 登录注销端点 - 设备验证端点 - 发行者URL - 是否允许多个发行者 - 设备授权端点 - JWK集合端点 -
+     * 令牌撤销端点 - 用户信息端点 - 令牌检查端点 授权配置地址
      * {"settings.authorization-server.oidc-client-registration-endpoint":"/connect/register","settings
      * .authorization-server.authorization-endpoint":"/oauth2/authorize","settings.authorization-server
      * .token-endpoint":"/oauth2/token","settings.authorization-server.oidc-logout-endpoint":"/connect/logout",
@@ -235,6 +221,7 @@ public class CamAuthorizationServerConfig {
      * .jwk-set-endpoint":"/oauth2/jwks","settings.authorization-server.token-revocation-endpoint":"/oauth2/revoke",
      * "settings.authorization-server.oidc-user-info-endpoint":"/userinfo","settings.authorization-server
      * .token-introspection-endpoint":"/oauth2/introspect"}
+     *
      * @return AuthorizationServerSettings对象，包含了授权服务器的配置信息
      */
     public AuthorizationServerSettings authorizationServerSettings() {
@@ -242,7 +229,7 @@ public class CamAuthorizationServerConfig {
                 .issuer("http://localhost:12000");
         return builder.build();
     }
-
+    
     /**
      * 自定义jwt，将权限信息放至jwt中
      */
@@ -268,7 +255,7 @@ public class CamAuthorizationServerConfig {
             }
         };
     }
-
+    
     /**
      * 自定义jwt解析器，设置解析出来的权限信息的前缀与在jwt中的key
      *
@@ -281,11 +268,11 @@ public class CamAuthorizationServerConfig {
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         // 设置权限信息在jwt， claim中的key
         grantedAuthoritiesConverter.setAuthoritiesClaimName(CamOauthConstants.AUTHORIZATION_KEY);
-
+        
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return authenticationConverter;
     }
-
-
+    
+    
 }
