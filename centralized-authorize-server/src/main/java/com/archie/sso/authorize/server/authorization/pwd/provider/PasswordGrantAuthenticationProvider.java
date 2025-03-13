@@ -1,41 +1,223 @@
 package com.archie.sso.authorize.server.authorization.pwd.provider;
 
-import com.archie.sso.authorize.server.authorization.pwd.token.PasswordGrantAuthenticationToken;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClaimAccessor;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization.Token;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContext;
+import org.springframework.security.oauth2.server.authorization.context.AuthorizationServerContextHolder;
+import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext;
+import org.springframework.security.oauth2.server.authorization.token.DefaultOAuth2TokenContext.Builder;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Comparator;
-import java.util.List;
+import com.archie.sso.authorize.server.authorization.pwd.token.PasswordGrantAuthenticationToken;
+import com.archie.sso.authorize.server.service.AuthorizationService;
+import com.archie.sso.authorize.server.service.UserService;
 
 /**
  * @author lavyoung1325
  */
 public class PasswordGrantAuthenticationProvider implements AuthenticationProvider {
-    
+
+    private AuthorizationService authorizationService;
+    private OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
+    public static final OAuth2TokenType ID_TOKEN_TYPE = new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
     private SessionRegistry sessionRegistry;
-    
+
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
+    private String username = null, password = null;
+    private Set<String> authorizedScopes = new HashSet<>();
+
+    public PasswordGrantAuthenticationProvider(AuthorizationService authorizationService,
+            OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator, UserService userService,
+            PasswordEncoder passwordEncoder) {
+        Assert.notNull(authorizationService, "authorizationService must not be null");
+        Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
+        this.authorizationService = authorizationService;
+        this.tokenGenerator = tokenGenerator;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        return null;
+        PasswordGrantAuthenticationToken token = (PasswordGrantAuthenticationToken) authentication;
+        OAuth2ClientAuthenticationToken clientAuthentication =
+                PasswordGrantAuthenticationProvider.extractOAuth2ClientAuthenticationToken(token);
+        RegisteredClient registeredClient = clientAuthentication.getRegisteredClient();
+        if (registeredClient == null) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
+        }
+        username = token.getUsername();
+        password = token.getPassword();
+        authorizedScopes = token.getScopes();
+
+        UserDetails userDetails = userService.loadUserByUsername(username);
+        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
+        }
+        if (CollectionUtils.isEmpty(registeredClient.getAuthorizationGrantTypes())
+                || registeredClient.getAuthorizationGrantTypes().contains(token.getGrantType())) {
+            throw new OAuth2AuthenticationException(OAuth2ErrorCodes.UNAUTHORIZED_CLIENT);
+        }
+        authorizedScopes.forEach(scope -> {
+            if (!registeredClient.getAuthorizationGrantTypes().contains(scope)) {
+                throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_SCOPE);
+            }
+        });
+
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        // 生成access_token
+        AuthorizationServerContext context = AuthorizationServerContextHolder.getContext();
+        Builder tokenBuilder = DefaultOAuth2TokenContext.builder()
+                .registeredClient(registeredClient)
+                .principal(usernamePasswordAuthenticationToken)
+                .authorizationServerContext(context)
+                .authorizationGrantType(token.getGrantType())
+                .authorizationGrant(token)
+                .authorizedScopes(authorizedScopes);
+        // access_token
+        DefaultOAuth2TokenContext tokenContext = tokenBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
+        OAuth2Token generatedAccessToken = this.tokenGenerator.generate(tokenContext);
+        if (generatedAccessToken == null) {
+            OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                    "The token generator failed to generate the access token.", null);
+            throw new OAuth2AuthenticationException(error);
+        }
+        OAuth2AccessToken accessToken =
+                new OAuth2AccessToken(TokenType.BEARER, generatedAccessToken.getTokenValue(),
+                        generatedAccessToken.getIssuedAt(),
+                        generatedAccessToken.getExpiresAt());
+        // Initialize the OAuth2Authorization
+        OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
+                .principalName(clientAuthentication.getName())
+                .authorizationGrantType(token.getGrantType());
+
+        if (generatedAccessToken instanceof ClaimAccessor claimAccessor) {
+            authorizationBuilder.token(accessToken, meta -> {
+                meta.put(Token.CLAIMS_METADATA_NAME, claimAccessor.getClaims());
+            });
+        } else {
+            authorizationBuilder.accessToken(accessToken);
+        }
+
+        // refresh token
+        OAuth2RefreshToken refreshToken = null;
+        if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)
+                && !clientAuthentication.getClientAuthenticationMethod().equals(
+                ClientAuthenticationMethod.NONE)) {
+            tokenContext = tokenBuilder.tokenType(OAuth2TokenType.REFRESH_TOKEN).build();
+            OAuth2Token auth2Token = this.tokenGenerator.generate(tokenContext);
+            if (!(auth2Token instanceof OAuth2RefreshToken auth2RefreshToken)) {
+                OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                        "The token generate failed to generate the refresh token", null);
+                throw new OAuth2AuthenticationException(error);
+            }
+            authorizationBuilder.refreshToken(auth2RefreshToken);
+        }
+
+        // ID-token
+        OidcIdToken oidcIdToken;
+        if (authorizedScopes.contains(OidcScopes.OPENID)) {
+            SessionInformation sessionInformation = getSessionInformation(usernamePasswordAuthenticationToken);
+            if (sessionInformation != null) {
+                try {
+                    SessionInformation information = new SessionInformation(sessionInformation.getPrincipal(),
+                            createHash(sessionInformation.getSessionId()), sessionInformation.getLastRequest());
+                } catch (NoSuchAlgorithmException e) {
+                    OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                            "Failed to compute hash for Session ID.", null);
+                    throw new OAuth2AuthenticationException(error);
+                }
+                tokenBuilder.put(SessionInformation.class, sessionInformation);
+            }
+            //
+            tokenContext = tokenBuilder.tokenType(ID_TOKEN_TYPE)
+                    .authorization(authorizationBuilder.build())
+                    .build();
+
+            // on
+            OAuth2Token generateToken = this.tokenGenerator.generate(tokenContext);
+            if (!(generateToken instanceof Jwt jwt)) {
+                OAuth2Error error = new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR,
+                        "The token generator failed to generate the ID token.", null);
+                throw new OAuth2AuthenticationException(error);
+            }
+            oidcIdToken = new OidcIdToken(generateToken.getTokenValue(), generateToken.getIssuedAt(),
+                    generateToken.getExpiresAt(), jwt.getClaims());
+            authorizationBuilder.token(oidcIdToken, meta -> {
+                meta.put(Token.CLAIMS_METADATA_NAME, oidcIdToken.getClaims());
+            });
+
+        } else {
+            oidcIdToken = null;
+        }
+        Map<String, Object> additionalParameters = Collections.emptyMap();
+        if (oidcIdToken != null) {
+            additionalParameters = new HashMap<>();
+            additionalParameters.put(OidcParameterNames.ID_TOKEN, oidcIdToken.getTokenValue());
+        }
+
+        OAuth2Authorization.Builder authorization =
+                authorizationBuilder.attribute(Principal.class.getName(), usernamePasswordAuthenticationToken);
+        // 保存授权信息
+        this.authorizationService.save(authorization.build());
+
+
+        return new OAuth2AccessTokenAuthenticationToken(registeredClient, usernamePasswordAuthenticationToken,
+                accessToken, refreshToken, additionalParameters);
     }
-    
+
     @Override
     public boolean supports(Class<?> authentication) {
         return PasswordGrantAuthenticationToken.class.isAssignableFrom(authentication);
     }
-    
+
     private static OAuth2ClientAuthenticationToken extractOAuth2ClientAuthenticationToken(
             Authentication authentication) {
         OAuth2ClientAuthenticationToken clientPrincipal = null;
@@ -47,7 +229,7 @@ public class PasswordGrantAuthenticationProvider implements AuthenticationProvid
         }
         throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_CLIENT);
     }
-    
+
     private SessionInformation getSessionInformation(Authentication principal) {
         SessionInformation sessionInformation = null;
         if (this.sessionRegistry != null) {
@@ -63,7 +245,7 @@ public class PasswordGrantAuthenticationProvider implements AuthenticationProvid
         }
         return sessionInformation;
     }
-    
+
     /**
      * 将给定的字符串值转换为SHA-256哈希值，并以Base64编码的形式返回 此方法用于生成给定文本的唯一标识符，常用于数据校验和加密场景
      *

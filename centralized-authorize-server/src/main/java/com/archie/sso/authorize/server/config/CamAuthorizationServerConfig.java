@@ -1,16 +1,11 @@
 package com.archie.sso.authorize.server.config;
 
-import com.archie.sso.authorize.common.constants.CamOauthConstants;
-import com.archie.sso.authorize.server.authorization.pwd.converter.PasswordGrantAuthenticationConverter;
-import com.archie.sso.authorize.server.authorization.pwd.provider.PasswordGrantAuthenticationProvider;
-import com.archie.sso.authorize.server.handler.UserLoginFailureHandler;
-import com.archie.sso.authorize.server.handler.UserLoginSuccessHandler;
-import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
-import com.archie.sso.authorize.server.service.AuthorizationConsentService;
-import com.archie.sso.authorize.server.service.AuthorizationService;
-import com.archie.sso.authorize.server.service.ClientService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +21,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
@@ -41,11 +37,19 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.archie.sso.authorize.common.constants.CamOauthConstants;
+import com.archie.sso.authorize.server.authorization.pwd.converter.PasswordGrantAuthenticationConverter;
+import com.archie.sso.authorize.server.authorization.pwd.provider.PasswordGrantAuthenticationProvider;
+import com.archie.sso.authorize.server.handler.UserLoginFailureHandler;
+import com.archie.sso.authorize.server.handler.UserLoginSuccessHandler;
+import com.archie.sso.authorize.server.pwd.provider.OAuth2ResourceOwnerPasswordAuthenticationProvider;
+import com.archie.sso.authorize.server.service.AuthorizationConsentService;
+import com.archie.sso.authorize.server.service.AuthorizationService;
+import com.archie.sso.authorize.server.service.ClientService;
+import com.archie.sso.authorize.server.service.UserService;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 授权服务配置
@@ -72,6 +76,12 @@ public class CamAuthorizationServerConfig {
     
     @NonNull
     private final ClientService clientService;
+
+    @NonNull
+    private final UserService userService;
+
+    @NonNull
+    private final PasswordEncoder passwordEncoder;
     
     @NonNull
     private final AuthorizationConsentService authorizationConsentService;
@@ -175,7 +185,9 @@ public class CamAuthorizationServerConfig {
         // 自定义的密码登录转换器和认证提供者
         authorizationServerConfigurer.tokenEndpoint(
                 tokenEndpoint -> tokenEndpoint.accessTokenRequestConverter(new PasswordGrantAuthenticationConverter())
-                        .authenticationProvider(new PasswordGrantAuthenticationProvider()));
+                        .authenticationProvider(
+                                new PasswordGrantAuthenticationProvider(authorizationService, auth2TokenGenerator,
+                                        userService, passwordEncoder)));
         authorizationServerConfigurer.authorizationServerSettings(authorizationServerSettings());
         
         // 获取端点匹配器
