@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.lang.Nullable;
+import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2DeviceCode;
@@ -23,6 +24,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -34,10 +36,10 @@ import com.archie.sso.authorize.server.service.AuthorizationService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Created by IntelliJ IDEA
@@ -46,7 +48,6 @@ import lombok.RequiredArgsConstructor;
  * @create 2023/9/28
  */
 @Service
-@RequiredArgsConstructor
 public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2AuthorizationMapper, OAuth2AuthorizationEntity>
         implements AuthorizationService {
 
@@ -58,9 +59,15 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
     @Resource
     private OAuth2AuthorizationMapper oAuth2AuthorizationMapper;
 
-    @Resource
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
+    public OAuth2AuthorizationServiceImpl() {
+        this.objectMapper = new ObjectMapper();
+        ClassLoader classLoader = OAuth2AuthorizationServiceImpl.class.getClassLoader();
+        List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
+        this.objectMapper.registerModules(securityModules);
+        this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
+    }
 
     @Override
     public void save(OAuth2Authorization authorization) {
@@ -92,7 +99,11 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
     @Nullable
     public OAuth2Authorization findById(String id) {
         Assert.notNull(id, "id  cannot be null");
-        return findBy(Collections.singletonList(oAuth2AuthorizationMapper.selectById(id)));
+        OAuth2AuthorizationEntity entity = oAuth2AuthorizationMapper.selectById(id);
+        if (entity == null) {
+            return null;
+        }
+        return findBy(Collections.singletonList(entity));
     }
 
 
@@ -145,7 +156,7 @@ public class OAuth2AuthorizationServiceImpl extends ServiceImpl<OAuth2Authorizat
         List<OAuth2Authorization> mapResult = new ArrayList<>();
         data.forEach(item -> {
             String registeredClientId = item.getRegisteredClientId();
-            RegisteredClient client = registeredClientRepository.findByClientId(registeredClientId);
+            RegisteredClient client = registeredClientRepository.findById(registeredClientId);
             if (client == null) {
                 throw new DataRetrievalFailureException(
                         "The RegisteredClient with id '" + registeredClientId + "' was not found in the RegisteredClientRepository.");

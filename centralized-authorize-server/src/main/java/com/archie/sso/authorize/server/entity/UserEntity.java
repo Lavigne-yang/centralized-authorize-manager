@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.archie.sso.authorize.common.utils.CamAuthorizationServerVersion;
-import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -21,17 +20,17 @@ import lombok.Data;
 /**
  * create table cam_user
  * (
- *     user_id     varchar(100)         not null comment '用户id' primary key,
- *     account     varchar(150)         not null comment '账户',
- *     username    varchar(150)         not null comment '用户名',
- *     password    varchar(200)         not null comment '密码',
- *     mobile      varchar(30)          null comment '手机号',
- *     email       varchar(200)         not null comment '邮箱',
- *     avatar_url  varchar(500)         null comment '头像地址',
- *     source_from tinyint    default 1 not null comment '用户来源',
- *     enable      tinyint(1) default 1 not null comment '是否启用',
- *     create_time bigint               not null comment '创建时间',
- *     update_time bigint               not null comment '更新时间'
+ * user_id     varchar(100)         not null comment '用户id' primary key,
+ * account     varchar(150)         not null comment '账户',
+ * username    varchar(150)         not null comment '用户名',
+ * password    varchar(200)         not null comment '密码',
+ * mobile      varchar(30)          null comment '手机号',
+ * email       varchar(200)         not null comment '邮箱',
+ * avatar_url  varchar(500)         null comment '头像地址',
+ * source_from tinyint    default 1 not null comment '用户来源',
+ * enable      tinyint(1) default 1 not null comment '是否启用',
+ * create_time bigint               not null comment '创建时间',
+ * update_time bigint               not null comment '更新时间'
  * ) comment '用户数据';
  * 实现自定义的User对象
  *
@@ -42,7 +41,7 @@ import lombok.Data;
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserEntity implements Serializable, UserDetails {
-    
+
     @Serial
     private static final long serialVersionUID = CamAuthorizationServerVersion.SERIAL_VERSION_UID;
 
@@ -56,9 +55,7 @@ public class UserEntity implements Serializable, UserDetails {
     private String avatarUrl;
     private String sourceFrom;
     private Boolean enable;
-    @TableField(fill = FieldFill.INSERT)
     private Long createTime;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateTime;
 
     /**
@@ -69,7 +66,6 @@ public class UserEntity implements Serializable, UserDetails {
 
     /**
      * 用户权限
-     *
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -108,8 +104,12 @@ public class UserEntity implements Serializable, UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserEntity that = (UserEntity) o;
         return Objects.equals(userId, that.userId) && Objects.equals(account, that.account) && Objects.equals(username,
                 that.username) && Objects.equals(password, that.password) && Objects.equals(mobile, that.mobile)
