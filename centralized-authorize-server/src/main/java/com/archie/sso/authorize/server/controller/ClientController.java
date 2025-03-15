@@ -10,19 +10,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.archie.sso.authorize.common.dto.Client;
 import com.archie.sso.authorize.common.utils.ResultResponse;
 import com.archie.sso.authorize.server.entity.ClientEntity;
 import com.archie.sso.authorize.server.mapping.ClientMapping;
+import com.archie.sso.authorize.server.service.ClientService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,7 +40,7 @@ public class ClientController {
 
     private final ClientMapping mapping;
 
-    private final RegisteredClientRepository registeredClientRepository;
+    private final ClientService clientService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -70,8 +72,14 @@ public class ClientController {
                 .clientSettings(ClientSettings.builder().build())
                 .tokenSettings(TokenSettings.builder().build())
                 .build();
-        registeredClientRepository.save(build);
+        clientService.save(build);
         return new ResultResponse<Boolean>().success(true);
+    }
+
+    @GetMapping("/info")
+    public ResultResponse<Object> info(@RequestParam("id") String client) {
+
+        return new ResultResponse<>().success(clientService.findByClientId(client));
     }
 
 }

@@ -70,7 +70,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
                 //                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)// 使用透明token
                 .build();
         RegisteredClient oidcClient = RegisteredClient.withId(IdWorker.get32UUID())
-                .clientId("cam-s")
+                .clientId("cam-d")
                 .clientSecret(passwordEncoder.encode("password"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
@@ -84,9 +84,9 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, ClientEntity> i
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .tokenSettings(tokenSettings)
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
                 .build();
-        //                save(oidcClient);
+        //                        save(oidcClient);
     }
     // http://127.0.0.1:12000/cam/oauth2/authorize?response_type=code&client_id=cam&scope=openid&redirect_uri=https://www.baidu.com
 

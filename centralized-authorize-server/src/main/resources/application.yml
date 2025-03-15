@@ -68,9 +68,24 @@ application:
   security:
     excludeUrls: #excludeUrls中存放白名单地址, 不需要经过授权 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
       - "/favicon.ico"
+      - "/actuator/**"
+      - "/error"
+      - "/v2/api-docs"
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    banner: false
+    db-config:
+      id-type: assign_id
+      insert-strategy: default
+      update-strategy: default
+      table-underline: true
+      logic-delete-value: 1
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 logging:
