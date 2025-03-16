@@ -7,6 +7,17 @@ spring:
     name: cam-authorization-server
   thymeleaf:
     cache: false
+  data:
+    redis:
+      mode: standalone
+      host: 192.168.3.100
+      port: 6379
+      database: 0
+      timeout: 5000
+      client-name: cam-authorization-server-1
+      cluster:
+        nodes: 192.168.3.48:7000,192.168.3.48:7001,192.168.3.48:7002,192.168.3.48:7003,192.168.3.48:7004,192.168.3.48:7005
+        max-redirects: 3
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.3.100:3306/cam?characterEncoding=utf8&serverTimezone=Asia/Shanghai
@@ -72,6 +83,7 @@ application:
       - "/error"
       - "/v2/api-docs"
 
+
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
@@ -93,3 +105,19 @@ logging:
     root: info
     org.springframework.web: info
     org.springframework.security: debug
+
+
+rocketmq:
+  name-server: 192.168.3.101:9876
+  topic: cam-authorization-server-topic
+  producer:
+    instance-name: cam-authorization-server-p1
+    max-message-size: 1048576
+    group: cam-authorization-server-c1
+    send-message-timeout: 6000
+    retry-times-when-send-failed: 3
+    retry-times-when-send-async-failed: 3
+  consumer:
+    group: cam-authorization-server-c1
+    pull-batch-size: 500
+
